@@ -1,0 +1,3 @@
+dist
+deno.lock
+templates/dist
