@@ -6,7 +6,7 @@ import {
   FunctionCall,
   Property,
 } from "./types.ts";
-import { Assert, IsOneOf } from "@type_guard";
+import { Assert, IsOneOf } from "../../deps.ts";
 
 function Occurences(data: string, search: string) {
   const iterator = new StringIterator(data);

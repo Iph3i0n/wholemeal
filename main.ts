@@ -1,9 +1,6 @@
-import * as Path from "@path";
-import * as DenoLoader from "@esbuild_deno";
-import Yargs from "@yargs";
+import { Path, DenoLoader, Yargs, EsBuild } from "./deps.ts";
 import Compile from "./compiler/component.ts";
 import { Runner } from "./types/runner.ts";
-import * as EsBuild from "@esbuild";
 
 const args = Yargs(Deno.args).parse();
 

@@ -1,4 +1,4 @@
-import * as Path from "@path";
+import { Path } from "../deps.ts";
 
 export async function EnsureDir(path: string) {
   try {

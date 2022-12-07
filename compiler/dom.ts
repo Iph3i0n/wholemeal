@@ -1,13 +1,6 @@
-import {
-  HTMLDocument,
-  Element,
-  NamedNodeMap,
-  Node,
-  Text,
-  NodeList,
-} from "@dom";
+import { Dom } from "../deps.ts";
 
-function InsertAttributes(map: NamedNodeMap) {
+function InsertAttributes(map: Dom.NamedNodeMap) {
   const array_data = [];
   for (let i = 0; i < map.length; i++) {
     const item = map.item(i);
@@ -25,7 +18,7 @@ function InsertAttributes(map: NamedNodeMap) {
   return "{" + result + "}";
 }
 
-function InsertHandlers(map: NamedNodeMap) {
+function InsertHandlers(map: Dom.NamedNodeMap) {
   const array_data = [];
   for (let i = 0; i < map.length; i++) {
     const item = map.item(i);
@@ -39,7 +32,7 @@ function InsertHandlers(map: NamedNodeMap) {
   return "{" + result + "}";
 }
 
-function InsertElement(element: Element): string {
+function InsertElement(element: Dom.Element): string {
   const attr = (key: string) => element.getAttribute(key);
   if (element.tagName.toLowerCase() === "s:if")
     return `...(${attr("check")?.replace(":", "")} ? ${InsertChildren(
@@ -67,35 +60,35 @@ function InsertElement(element: Element): string {
   }`;
 }
 
-function InsertText(text: Text) {
+function InsertText(text: Dom.Text) {
   if (text.textContent.trim())
     return `"${text.textContent.trim().replaceAll("\n", " ")}"`;
   return undefined;
 }
 
-function IsElement(node: Node): node is Element {
+function IsElement(node: Dom.Node): node is Dom.Element {
   return node.nodeType === node.ELEMENT_NODE;
 }
 
-function IsText(node: Node): node is Text {
+function IsText(node: Dom.Node): node is Dom.Text {
   return node.nodeType === node.TEXT_NODE;
 }
 
-function InsertNode(node: Node) {
+function InsertNode(node: Dom.Node) {
   if (IsElement(node)) return InsertElement(node);
   else if (IsText(node)) return InsertText(node);
 
   return undefined;
 }
 
-function InsertChildren(children: NodeList) {
+function InsertChildren(children: Dom.NodeList) {
   const result = [];
   for (const node of children) result.push(InsertNode(node));
 
   return "[" + result.filter((r) => r).join(",") + "]";
 }
 
-export default function Compile(data: HTMLDocument) {
+export default function Compile(data: Dom.HTMLDocument) {
   if (data.body.childNodes.length === 0)
     return `{ tag: "slot", attr: {}, handlers: {}, children: [] }`;
   return InsertChildren(data.body.childNodes);

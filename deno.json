@@ -4,6 +4,5 @@
   },
   "tasks": {
     "test": "deno test --allow-all"
-  },
-  "importMap": "import_map.json"
+  }
 }

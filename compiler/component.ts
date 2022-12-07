@@ -1,4 +1,4 @@
-import { DOMParser, Element } from "@dom";
+import { Dom } from "../deps.ts";
 import CompileDom from "./dom.ts";
 import CompileCss from "./css/mod.ts";
 
@@ -52,12 +52,12 @@ function BuildTemplate(data: {
 }
 
 export default function Compile(component: string) {
-  const dom = new DOMParser().parseFromString(component, "text/html");
+  const dom = new Dom.DOMParser().parseFromString(component, "text/html");
   if (!dom) throw new Error("Cannot parse component");
 
   const get_then_remove = <T>(
     selector: string,
-    transform: (e: Element) => string
+    transform: (e: Dom.Element) => string
   ) => {
     const ele = dom.querySelector(selector);
     if (!ele) return "";
