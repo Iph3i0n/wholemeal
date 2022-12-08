@@ -77,6 +77,7 @@ export function CreateComponent(
     async connectedCallback() {
       this.#redraw = await comp.bind(this)((c) => this.#render(c));
       this.addEventListener("should_render", () => this.#redraw());
+      this.dispatchEvent(new Event("loaded"));
     }
 
     attributeChangedCallback() {

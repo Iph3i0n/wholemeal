@@ -13,9 +13,11 @@ export default function RenderSheet(sheet: Ast.Css.Sheet) {
       {} as Record<string, Array<[string, string]>>
     );
 
-    const result = [
-      `${rule.selector}{${queries[""]?.map((q) => q.join(":")).join(";")}}`,
-    ];
+    const result = [];
+    if (queries[""])
+      result.push(
+        `${rule.selector}{${queries[""].map((q) => q.join(":")).join(";")}}`
+      );
     delete queries[""];
     for (const key in queries)
       result.push(

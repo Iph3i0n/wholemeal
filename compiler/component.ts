@@ -35,6 +35,9 @@ function BuildTemplate(data: {
 
       call_render();
 
+      if (typeof after_load === "function")
+        after_load.bind(this)();
+
       return call_render;
     };
 
