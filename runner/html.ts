@@ -1,6 +1,6 @@
 import { Ast } from "../types/ast.ts";
 
-function RenderElement(element: Ast.Html.Element) {
+export function RenderElement(element: Ast.Html.Element) {
   const result = document.createElement(element.tag);
   for (const key in element.attr)
     if (element.attr[key] !== undefined)
@@ -12,11 +12,11 @@ function RenderElement(element: Ast.Html.Element) {
   return result;
 }
 
-function RenderText(element: Ast.Html.Text) {
+export function RenderText(element: Ast.Html.Text) {
   return document.createTextNode(element);
 }
 
-function RenderNode(node: Ast.Html.Node) {
+export function RenderNode(node: Ast.Html.Node) {
   if (typeof node === "string") return RenderText(node);
   return RenderElement(node);
 }

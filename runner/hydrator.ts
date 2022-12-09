@@ -52,7 +52,7 @@ function MergeElement(
     for (i; i < next.childNodes.length; i++) {
       const item = next.childNodes[i];
       const existing = target.childNodes[i];
-      MergeNode(item, existing, parent);
+      MergeNode(item, existing, target);
     }
 
     for (i; i < target.childNodes.length; i++) {

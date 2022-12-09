@@ -28,16 +28,9 @@ function BuildTemplate(data: {
           html: ${data.html},
           css: ${data.css},
         });
-
-        if (typeof after_render === "function")
-          after_render.bind(this)();
       };
 
       call_render();
-
-      if (typeof after_load === "function")
-        after_load.bind(this)();
-
       return call_render;
     };
 

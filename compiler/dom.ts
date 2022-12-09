@@ -40,7 +40,7 @@ function InsertElement(element: Dom.Element): string {
     )} : [])`;
 
   if (element.tagName.toLowerCase() === "s:for")
-    return `...${attr("subject")?.replace(":", "")}.flatMap((${
+    return `...(${attr("subject")?.replace(":", "")}).flatMap((${
       attr("key") ?? "ctx"
     }) => (${InsertChildren(element.childNodes)}))`;
 
