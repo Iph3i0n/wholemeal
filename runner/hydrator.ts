@@ -1,3 +1,5 @@
+import HandlerStore from "./handler-store.ts";
+
 function IsElement(node: Node): node is HTMLElement {
   return node.nodeType === node.ELEMENT_NODE;
 }
@@ -6,18 +8,20 @@ function IsText(node: Node): node is Text {
   return node.nodeType === node.TEXT_NODE;
 }
 
+function RemoveChildrenFrom(element: HTMLElement | ShadowRoot, index: number) {
+  if (element.childNodes.length < index) return;
+  for (let i = element.childNodes.length - 1; i >= index; i--)
+    element.childNodes[i].remove();
+}
+
 function MergeText(
   next: Text,
   target: Node | null,
   parent: ShadowRoot | HTMLElement
 ) {
-  if (!target) parent.append(next);
-  else if (!IsText(target)) parent.replaceChild(next, target);
-  else {
-    const current = next.textContent;
-    const existing = target.textContent;
-    if (current !== existing) target.textContent = current;
-  }
+  if (!target) parent.append(next.cloneNode(true));
+  else if (!IsText(target)) parent.replaceChild(next.cloneNode(true), target);
+  else target.textContent = next.textContent;
 }
 
 function MergeElement(
@@ -25,9 +29,9 @@ function MergeElement(
   target: Node | null,
   parent: ShadowRoot | HTMLElement
 ) {
-  if (!target) parent.append(next);
+  if (!target) parent.append(next.cloneNode(true));
   else if (!IsElement(target) || target.tagName !== next.tagName)
-    parent.replaceChild(next, target);
+    parent.replaceChild(next.cloneNode(true), target);
   else {
     if (target.tagName === "style") {
       target.innerHTML = next.innerHTML;
@@ -41,22 +45,22 @@ function MergeElement(
       if (existing !== attr.value) target.setAttribute(attr.name, attr.value);
     }
 
-    for (let i = 0; i < target.attributes.length; i++) {
+    for (let i = target.attributes.length - 1; i >= 0; i--) {
       const attr = target.attributes.item(i);
       if (!attr) continue;
       if (!next.attributes.getNamedItem(attr.name))
         target.removeAttribute(attr.name);
     }
 
-    let i = 0;
-    for (i; i < next.childNodes.length; i++) {
+    const store = HandlerStore.GetFor(next);
+    store?.move_to(target);
+
+    RemoveChildrenFrom(target, next.childNodes.length);
+
+    for (let i = 0; i < next.childNodes.length; i++) {
       const item = next.childNodes[i];
       const existing = target.childNodes[i];
       MergeNode(item, existing, target);
-    }
-
-    for (i; i < target.childNodes.length; i++) {
-      target.childNodes[i].remove();
     }
   }
 }
@@ -71,14 +75,10 @@ function MergeNode(
 }
 
 export default function HydrateFrom(updated: Array<Node>, root: ShadowRoot) {
-  let i = 0;
-  for (i; i < updated.length; i++) {
+  RemoveChildrenFrom(root, updated.length);
+  for (let i = 0; i < updated.length; i++) {
     const item = updated[i];
     const existing = root.childNodes[i];
     MergeNode(item, existing, root);
-  }
-
-  for (i; i < root.childNodes.length; i++) {
-    root.childNodes[i].remove();
   }
 }
