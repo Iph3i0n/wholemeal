@@ -12,7 +12,11 @@ const DEV = Boolean(args.dev);
 async function Main() {
   try {
     const project_file = Path.resolve(Path.join(CWD, PROJECT_FILE));
-    console.log(`Compiling for ${project_file}`);
+    console.log(
+      `${
+        new Date().toTimeString().split(" ")[0]
+      }: Compiling for ${project_file}`
+    );
     const data = await Deno.readTextFile(project_file);
     const project: Runner.Project = JSON.parse(data);
     const global = await Deno.readTextFile(Path.join(CWD, project.global_css));
