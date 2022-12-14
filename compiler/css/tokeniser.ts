@@ -33,10 +33,13 @@ function* Split(data: string) {
     const preamble_parts = preamble.split(";");
     if (preamble_parts.length > 1)
       for (let i = 0; i < preamble_parts.length - 1; i++)
-        yield preamble_parts[i].trim();
+        if (preamble_parts[i].trim()) yield preamble_parts[i].trim();
 
     const selector = preamble_parts[preamble_parts.length - 1].trim();
-    if (iterator.Done) yield selector;
+    if (iterator.Done) {
+      if (selector.trim()) yield selector.trim();
+      continue;
+    }
 
     let block_data = "{" + iterator.GetUntil("}", true);
     while (Occurences(block_data, "{") !== Occurences(block_data, "}"))
@@ -47,7 +50,7 @@ function* Split(data: string) {
 }
 
 function ParseProperty(data: string): Property | FunctionCall {
-  if (data.trim().match(/^[a-zA-Z]+\(/gm)) {
+  if (data.trim().match(/^[^:]+\(/gm)) {
     const iterator = new StringIterator(data.trim());
     const name = iterator.GetUntil("(");
     const args: Array<string> = [];

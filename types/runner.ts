@@ -7,6 +7,8 @@ export namespace Runner {
     readonly props: Record<string, string>;
     set_flag(key: string, value: any): void;
     get_flag(key: string): any;
+    readonly internals: ElementInternals;
+    readonly root: ShadowRoot;
   }
 
   export type ComponentFunction = (

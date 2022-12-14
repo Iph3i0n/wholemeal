@@ -1,15 +1,32 @@
+import "https://cdn.skypack.dev/element-internals-polyfill";
+import "https://cdn.jsdelivr.net/npm/form-request-submit-polyfill";
+
 import { Runner } from "../types/runner.ts";
 import { Ast } from "../types/ast.ts";
 import ObjectUtils from "./object.ts";
 import HydrateFrom from "./hydrator.ts";
 import RenderDom from "./html.ts";
 import RenderSheet from "./css.ts";
+import {
+  LoadedEvent,
+  PropsEvent,
+  RenderEvent,
+  ShouldRender,
+} from "./events.ts";
+
+function PropValue(value: string) {
+  return value === ""
+    ? true
+    : value === "true"
+    ? true
+    : value === "false"
+    ? false
+    : // deno-lint-ignore no-explicit-any
+      (value as any);
+}
 
 function ProcessProps(props: Record<string, string>): Record<string, string> {
-  return ObjectUtils.MapKeys(props, (_, value) =>
-    // deno-lint-ignore no-explicit-any
-    value === "" ? true : value === "true" ? true : (value as any)
-  );
+  return ObjectUtils.MapKeys(props, (_, value) => PropValue(value));
 }
 
 export function CreateComponent(
@@ -19,6 +36,7 @@ export function CreateComponent(
     form?: boolean;
     base: new () => HTMLElement;
     extends?: string;
+    aria: Record<string, string>;
   },
   comp: Runner.ComponentFunction
 ) {
@@ -27,6 +45,7 @@ export function CreateComponent(
     public static formAssociated = !!schema.form;
 
     readonly #root: ShadowRoot;
+    readonly #internals: ElementInternals;
     #redraw: () => void = () => {};
     // deno-lint-ignore no-explicit-any
     readonly #flags: Record<string, any> = {};
@@ -38,6 +57,13 @@ export function CreateComponent(
     constructor() {
       super();
       this.#root = this.attachShadow({ mode: "open" });
+      this.#internals = this.attachInternals();
+
+      // deno-lint-ignore no-explicit-any
+      const internals: any = this.#internals;
+      for (const key in schema.aria)
+        if (key === "Role") internals.role = schema.aria[key];
+        else internals[`aria${key}`] = schema.aria[key];
     }
 
     get props() {
@@ -71,17 +97,22 @@ export function CreateComponent(
       const styles = document.createElement("style");
       styles.innerHTML = RenderSheet(comp.css);
       HydrateFrom([...result, styles], this.#root);
-      this.dispatchEvent(new Event("rerendered", { bubbles: false }));
+      this.dispatchEvent(new RenderEvent());
     }
 
     async connectedCallback() {
       this.#redraw = await comp.bind(this)((c) => this.#render(c));
-      this.addEventListener("should_render", () => this.#redraw());
-      this.dispatchEvent(new Event("loaded"));
+      this.addEventListener(ShouldRender.Key, () => this.#redraw());
+      this.dispatchEvent(new LoadedEvent());
     }
 
-    attributeChangedCallback() {
+    attributeChangedCallback(name: string, old: string, next: string) {
       this.#redraw();
+      this.dispatchEvent(new PropsEvent(name, PropValue(old), PropValue(next)));
+    }
+
+    get internals() {
+      return this.#internals;
     }
 
     get root() {

@@ -40,7 +40,8 @@ function BuildTemplate(data: {
         props: typeof props === "object" ? props : [],
         form: typeof form === "boolean" ? form : false,
         base: typeof base === "function" ? base : HTMLElement,
-        extends: typeof extension === "string" ? extension : undefined
+        extends: typeof extension === "string" ? extension : undefined,
+        aria: typeof aria === "object" ? aria : {}
       },
       Component
     );
@@ -51,7 +52,7 @@ export default function Compile(component: string) {
   const dom = new Dom.DOMParser().parseFromString(component, "text/html");
   if (!dom) throw new Error("Cannot parse component");
 
-  const get_then_remove = <T>(
+  const get_then_remove = (
     selector: string,
     transform: (e: Dom.Element) => string
   ) => {

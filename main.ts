@@ -1,5 +1,6 @@
 import { Path, DenoLoader, Yargs, EsBuild } from "./deps.ts";
 import Compile from "./compiler/component.ts";
+import CompileCss from "./compiler/css/mod.ts";
 import { Runner } from "./types/runner.ts";
 
 const args = Yargs(Deno.args).parse();
@@ -58,6 +59,24 @@ async function Main() {
             });
           },
         },
+        {
+          name: "css-dough",
+          setup: (build) => {
+            build.onResolve({ filter: /\.pss$/ }, (args) => {
+              return {
+                path: Path.join(Path.dirname(args.importer), args.path),
+              };
+            });
+
+            build.onLoad({ filter: /\.pss$/ }, async (args) => {
+              const data = await Deno.readTextFile(args.path);
+              return {
+                contents: "module.exports = " + CompileCss(data),
+                loader: "js",
+              };
+            });
+          },
+        },
         // deno-lint-ignore no-explicit-any
         DenoLoader.denoPlugin() as any,
       ],
@@ -72,8 +91,18 @@ async function Main() {
 await Main();
 if (DEV) {
   console.log("Listening for changes in " + CWD);
+
+  const should_like: Array<(p: string) => boolean> = [
+    (p) => p.endsWith(".std"),
+    (p) => p.endsWith(".js") && !p.endsWith("bundle.min.js"),
+    (p) => p.endsWith(".ts"),
+    (p) => p.endsWith(".pss"),
+    (p) => p.endsWith(".json"),
+  ];
+
+  const is_valid = (p: string) => should_like.some((l) => l(p));
   for await (const eve of Deno.watchFs(CWD))
-    if (eve.paths.some((p) => p.endsWith(".std"))) await Main();
+    if (eve.paths.some(is_valid)) await Main();
 } else {
   Deno.exit(0);
 }

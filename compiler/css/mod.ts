@@ -25,7 +25,14 @@ function ParseProperty(
     return `["${prop.id}", ${ParseValue(prop.value)}, ${media ?? "undefined"}]`;
   }
 
-  return `...${prop.name}(${[...prop.args].join(",")})`;
+  return `...${prop.name}(${[...prop.args].join(",")}).map(
+    ([type, value, media]) => [
+      type,
+      value,
+      media
+        ? media + ${media ? '" and " +' + media : '""'}
+        : ${media ? media : "undefined"}
+  ])`;
 }
 
 function ParseDeclarations(
@@ -35,54 +42,72 @@ function ParseDeclarations(
   return `[${[...declarations].map((d) => ParseProperty(d, media))}]`;
 }
 function InsertAtStatement(value: AtStatement): Array<string> {
+  if (value.variant === "@insert")
+    return [`result.push(...require("${value.value}"))`];
+  if (value.variant === "@require") {
+    const [path, name] = value.value.split(" as ");
+    return [`const ${name} = require("${path}");`];
+  }
+
   return [
-    `{ rule: "${value.variant}", statement: ${ParseValue(value.value)} }`,
+    `result.push({
+      rule: "${value.variant}",
+      statement: ${ParseValue(value.value)}
+    })`,
   ];
 }
 
-function InsertAtBlock(value: AtBlock, _: string | undefined): Array<string> {
+function InsertAtBlock(
+  value: AtBlock,
+  existing: string | undefined
+): Array<string> {
   const query = ParseValue(value.query);
   if (value.variant !== "media")
     return [
-      `{
+      `result.push({
           variant: "${value.variant}",
           query: ${query},
-          children: [
-              ${[...value.children]
-                .flatMap((r) => ParseBlock(r, query))
-                .join(",")}
-          ] 
-        }`,
+          children: ${BuildBlocks(value.children, existing)} 
+        })`,
     ];
   return [...value.children]
-    .flatMap((r) => ParseBlock(r, query))
+    .flatMap((r) =>
+      ParseBlock(r, existing ? existing + " and " + query : query)
+    )
     .filter((r) => r) as Array<string>;
 }
 
 function InsertRule(value: Rule, media: string | undefined): Array<string> {
   return [
-    `{
+    `result.push({
         selector: ${ParseValue(value.selector)},
         properties: ${ParseDeclarations(value.children, media)}
-    }`,
+    })`,
   ];
 }
 
 function InsertFor(value: For, media: string | undefined): Array<string> {
-  const statement =
-    value.accessor === "of" ? value.subject : `Object.keys(${value.subject})`;
-  const rules = [...value.children].flatMap((r) => ParseBlock(r, media));
-  return [`...(${statement}.flatMap((${value.key}) => [${rules.join(",")}]))`];
+  return [
+    `for (const ${value.key} ${value.accessor} ${value.subject})
+      result.push(...${BuildBlocks(value.children, media)});`,
+  ];
 }
 
 function InsertIf(value: If, media: string | undefined): Array<string> {
-  const rules = [...value.children].flatMap((r) => ParseBlock(r, media));
-  return [`...(${value.check} ? [${rules.join(",")}] : [])`];
+  return [
+    `if (${value.check}) result.push(...${BuildBlocks(value.children, media)})`,
+  ];
 }
 
 function InsertUse(value: Use, media: string | undefined): Array<string> {
-  const rules = [...value.children].flatMap((r) => ParseBlock(r, media));
-  return [`...((${value.key}) => [${rules.join(",")}])(${value.subject})`];
+  return [
+    `result.push(
+      ...${BuildBlocks(value.children, media, {
+        name: value.key,
+        value: value.subject,
+      })}
+    )`,
+  ];
 }
 
 function ParseBlock(item: Block, media: string | undefined) {
@@ -102,10 +127,21 @@ function ParseBlock(item: Block, media: string | undefined) {
   }
 }
 
-export default function Compile(data: string) {
+function BuildBlocks(
+  data: Iterable<Block>,
+  media: string | undefined,
+  args?: { name: string; value: string }
+) {
   const result: Array<string> = [];
-  for (const block of CssAst(data))
-    result.push(...ParseBlock(block, undefined));
+  for (const block of data) result.push(...ParseBlock(block, media));
 
-  return "[" + result.join(",") + "]";
+  return `((${args?.name ?? ""}) => {
+    const result = [];
+    ${result.join("\n")}
+    return result;
+  })(${args?.value ?? ""})`;
+}
+
+export default function Compile(data: string) {
+  return BuildBlocks(CssAst(data), undefined);
 }

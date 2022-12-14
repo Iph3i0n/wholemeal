@@ -90,6 +90,6 @@ function InsertChildren(children: Dom.NodeList) {
 
 export default function Compile(data: Dom.HTMLDocument) {
   if (data.body.childNodes.length === 0)
-    return `{ tag: "slot", attr: {}, handlers: {}, children: [] }`;
+    return `[{ tag: "slot", attr: {}, handlers: {}, children: [] }]`;
   return InsertChildren(data.body.childNodes);
 }
