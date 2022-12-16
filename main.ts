@@ -10,9 +10,13 @@ const PROJECT_FILE = args.proj || "project.sd.json";
 const OUT_DIR = args.out || "./dist";
 const DEV = Boolean(args.dev);
 
+function import_path(p: string) {
+  return Path.resolve(Path.join(CWD, p));
+}
+
 async function Main() {
   try {
-    const project_file = Path.resolve(Path.join(CWD, PROJECT_FILE));
+    const project_file = import_path(PROJECT_FILE);
     console.log(
       `${
         new Date().toTimeString().split(" ")[0]
@@ -20,18 +24,19 @@ async function Main() {
     );
     const data = await Deno.readTextFile(project_file);
     const project: Runner.Project = JSON.parse(data);
-    const global = await Deno.readTextFile(Path.join(CWD, project.global_css));
 
     const result = await EsBuild.build({
       stdin: {
         contents: `
-          ${project.templates
-            .map((t) => `import "${Path.resolve(Path.join(CWD, t))}"`)
-            .join(";")}
+          ${project.templates.map((t) => `import "${t}"`).join(";")};
+          import RenderSheet from "${import.meta.resolve("./runner/css.ts")}";
+          import GlobalCss from "${project.global_css}";
           const style = document.createElement("style");
-          style.innerHTML = \`${global}\`;
+          style.innerHTML = RenderSheet(GlobalCss);
           document.head.append(style);`,
         loader: "ts",
+        resolveDir: Path.resolve(CWD),
+        sourcefile: "main.ts",
       },
       loader: {
         ".ts": "ts",
@@ -46,9 +51,12 @@ async function Main() {
         {
           name: "st-dough",
           setup: (build) => {
-            build.onResolve({ filter: /\.std$/ }, (args) => ({
-              path: args.path,
-            }));
+            build.onResolve({ filter: /\.std$/ }, (args) => {
+              if (args.path.startsWith("/")) return { path: args.path };
+              return {
+                path: Path.join(args.resolveDir, args.path),
+              };
+            });
 
             build.onLoad({ filter: /\.std$/ }, async (args) => {
               const data = await Deno.readTextFile(args.path);
@@ -63,8 +71,9 @@ async function Main() {
           name: "css-dough",
           setup: (build) => {
             build.onResolve({ filter: /\.pss$/ }, (args) => {
+              if (args.path.startsWith("/")) return { path: args.path };
               return {
-                path: Path.join(Path.dirname(args.importer), args.path),
+                path: Path.join(args.resolveDir, args.path),
               };
             });
 
@@ -77,8 +86,7 @@ async function Main() {
             });
           },
         },
-        // deno-lint-ignore no-explicit-any
-        DenoLoader.denoPlugin() as any,
+        DenoLoader.denoPlugin(),
       ],
     });
 

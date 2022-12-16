@@ -19,6 +19,14 @@ function Occurences(data: string, search: string) {
   return count;
 }
 
+function SafeSplit(data: string, search: string) {
+  const iterator = new StringIterator(data);
+  const result: Array<string> = [];
+  while (!iterator.Done) result.push(iterator.GetUntil(search));
+
+  return result;
+}
+
 function FlattenWhitespace(data: string) {
   return data
     .split(/\s/)
@@ -30,7 +38,7 @@ function* Split(data: string) {
   const iterator = new StringIterator(data);
   while (!iterator.Done) {
     const preamble = iterator.GetUntil("{");
-    const preamble_parts = preamble.split(";");
+    const preamble_parts = SafeSplit(preamble, ";");
     if (preamble_parts.length > 1)
       for (let i = 0; i < preamble_parts.length - 1; i++)
         if (preamble_parts[i].trim()) yield preamble_parts[i].trim();
@@ -63,7 +71,7 @@ function ParseProperty(data: string): Property | FunctionCall {
     return { name, args };
   }
 
-  const [id, ...value] = data.split(":");
+  const [id, ...value] = SafeSplit(data, ":");
   return { id: id.trim(), value: value.join(":").trim() };
 }
 
@@ -92,7 +100,7 @@ function ProcessAtBlock(data: AtBlock): Block {
     }
     case "use": {
       const statement = data.query.substring(2, data.query.length - 1);
-      const [key, ...js] = statement.split("=");
+      const [key, ...js] = SafeSplit(statement, "=");
 
       return {
         type: "use",
