@@ -36,7 +36,7 @@ export default function RenderSheet(sheet: Ast.Css.Sheet) {
   }
 
   function RenderAtStatement(at: Ast.Css.AtStatement) {
-    return `@${at.rule} ${at.statement};`;
+    return `${at.rule} ${at.statement};`;
   }
 
   let result = "";
