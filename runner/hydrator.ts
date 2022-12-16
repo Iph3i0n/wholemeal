@@ -8,6 +8,19 @@ function IsText(node: Node): node is Text {
   return node.nodeType === node.TEXT_NODE;
 }
 
+function clone(node: Node) {
+  if (!(node instanceof HTMLElement)) return node.cloneNode(true);
+  const result = node.cloneNode(false) as HTMLElement;
+  const store = HandlerStore.GetFor(node);
+  store?.move_to(result);
+  for (let i = 0; i < node.childNodes.length; i++) {
+    const next = node.childNodes[i];
+    result.append(clone(next));
+  }
+
+  return result;
+}
+
 function RemoveChildrenFrom(element: HTMLElement | ShadowRoot, index: number) {
   if (element.childNodes.length < index) return;
   for (let i = element.childNodes.length - 1; i >= index; i--)
@@ -19,8 +32,8 @@ function MergeText(
   target: Node | null,
   parent: ShadowRoot | HTMLElement
 ) {
-  if (!target) parent.append(next.cloneNode(true));
-  else if (!IsText(target)) parent.replaceChild(next.cloneNode(true), target);
+  if (!target) parent.append(clone(next));
+  else if (!IsText(target)) parent.replaceChild(clone(next), target);
   else target.textContent = next.textContent;
 }
 
@@ -29,9 +42,9 @@ function MergeElement(
   target: Node | null,
   parent: ShadowRoot | HTMLElement
 ) {
-  if (!target) parent.append(next.cloneNode(true));
+  if (!target) parent.append(clone(next));
   else if (!IsElement(target) || target.tagName !== next.tagName)
-    parent.replaceChild(next.cloneNode(true), target);
+    parent.replaceChild(clone(next), target);
   else {
     if (target.tagName === "style") {
       target.innerHTML = next.innerHTML;

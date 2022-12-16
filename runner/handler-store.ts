@@ -27,6 +27,7 @@ export default class HandlerStore {
   }
 
   add(key: string, handler: (e: Event) => void) {
+    console.log(`Adding ${key} to ${this.#target?.tagName}`);
     this.#target?.addEventListener(key, handler);
     this.#handlers.push([key, handler]);
   }
@@ -41,6 +42,9 @@ export default class HandlerStore {
   move_to(target: HTMLElement) {
     const existing = HandlerStore.#get_store(target);
     existing?.clear();
+    console.log(
+      `Adding ${this.#handlers.length} handlers to ${target.tagName}`
+    );
     for (const [key, handler] of this.#handlers)
       target.addEventListener(key, handler);
 
