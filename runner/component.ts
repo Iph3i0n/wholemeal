@@ -5,7 +5,6 @@ import { Runner } from "../types/runner.ts";
 import { Ast } from "../types/ast.ts";
 import ObjectUtils from "./object.ts";
 import HydrateFrom from "./hydrator.ts";
-import RenderDom from "./html.ts";
 import RenderSheet from "./css.ts";
 import {
   LoadedEvent,
