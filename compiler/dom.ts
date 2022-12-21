@@ -4,7 +4,8 @@ function InsertAttributes(map: Dom.NamedNodeMap) {
   const array_data = [];
   for (let i = 0; i < map.length; i++) {
     const item = map.item(i);
-    if (item && !item.name.startsWith("on:")) array_data.push(item);
+    if (item && !item.name.startsWith("on:") && !item.name.startsWith("s:"))
+      array_data.push(item);
   }
 
   const result = array_data
@@ -52,9 +53,14 @@ function InsertElement(element: Dom.Element): string {
   if (element.tagName.toLowerCase() === "s:text")
     return attr("use")?.replace(":", "") ?? "";
 
+  const ref_data = element.getAttribute("s:ref")
+    ? `ref: ${element.getAttribute("s:ref")},`
+    : "";
+
   return `{
     tag: "${element.tagName.toLowerCase()}",
     attr: ${InsertAttributes(element.attributes)},
+    ${ref_data}
     handlers: ${InsertHandlers(element.attributes)},
     children: ${InsertChildren(element.childNodes)}
   }`;

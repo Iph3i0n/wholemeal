@@ -5,7 +5,10 @@ export function RenderElement(element: Ast.Html.Element) {
   for (const key in element.attr)
     if (element.attr[key] !== undefined)
       result.setAttribute(key, element.attr[key]);
-  for (const key in element.handlers) result.addEventListener(key, element.handlers[key]);
+  for (const key in element.handlers)
+    result.addEventListener(key, element.handlers[key]);
+
+  if (element.ref) element.ref.current = result;
 
   result.append(...element.children.map(RenderNode));
   return result;

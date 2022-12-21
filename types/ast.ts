@@ -5,6 +5,7 @@ export namespace Ast {
     export type Element = {
       tag: string;
       attr: Record<string, string>;
+      ref?: { current?: HTMLElement };
       handlers: Record<string, (e: Event) => void>;
       children: Array<Node>;
     };
