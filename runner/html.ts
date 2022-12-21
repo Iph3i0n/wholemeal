@@ -1,13 +1,11 @@
 import { Ast } from "../types/ast.ts";
-import HandlerStore from "./handler-store.ts";
 
 export function RenderElement(element: Ast.Html.Element) {
   const result = document.createElement(element.tag);
   for (const key in element.attr)
     if (element.attr[key] !== undefined)
       result.setAttribute(key, element.attr[key]);
-  const store = new HandlerStore(result);
-  for (const key in element.handlers) store.add(key, element.handlers[key]);
+  for (const key in element.handlers) result.addEventListener(key, element.handlers[key]);
 
   result.append(...element.children.map(RenderNode));
   return result;

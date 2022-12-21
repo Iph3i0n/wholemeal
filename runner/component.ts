@@ -93,10 +93,7 @@ export function CreateComponent(
     }
 
     #render(comp: Ast.Component) {
-      const result = RenderDom(comp.html);
-      const styles = document.createElement("style");
-      styles.innerHTML = RenderSheet(comp.css);
-      HydrateFrom([...result, styles], this.#root);
+      HydrateFrom(comp.html, RenderSheet(comp.css), this.#root);
       this.dispatchEvent(new RenderEvent());
     }
 
