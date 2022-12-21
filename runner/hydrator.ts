@@ -1,4 +1,5 @@
 import { Ast } from "../types/ast.ts";
+import EventManager from "./event-manager.ts";
 import { RenderElement, RenderText } from "./html.ts";
 
 function IsElement(node: Node): node is HTMLElement {
@@ -48,6 +49,9 @@ function MergeElement(
       if (!attr) continue;
       if (!(attr.name in next.attr)) target.removeAttribute(attr.name);
     }
+
+    const manager = new EventManager(target);
+    for (const key in next.handlers) manager.Add(key, next.handlers[key]);
 
     RemoveChildrenFrom(target, next.children.length);
 
