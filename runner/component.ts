@@ -11,6 +11,7 @@ import {
   PropsEvent,
   RenderEvent,
   ShouldRender,
+  BeforeRenderEvent,
 } from "./events.ts";
 
 function PropValue(value: string) {
@@ -83,6 +84,7 @@ export function CreateComponent(
     }
 
     #render() {
+      this.dispatchEvent(new BeforeRenderEvent());
       HydrateFrom(this.#html(), RenderSheet(this.#css()), this.#root);
       this.dispatchEvent(new RenderEvent());
     }

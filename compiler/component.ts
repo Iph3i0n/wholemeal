@@ -17,14 +17,15 @@ function BuildTemplate(data: {
       RenderEvent,
       ShouldRender,
       PropsEvent,
-      CreateRef
+      CreateRef,
+      BeforeRenderEvent
     } from "${import.meta.resolve("../mod.ts")}";
     ${data.metadata}
 
     async function Component() {
       const self = this;
       const handle = (handler) => (e) => {
-        handler.bind(this)(e);
+        handler(e);
         self.dispatchEvent(new ShouldRender());
       };
 

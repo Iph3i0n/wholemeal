@@ -4,6 +4,7 @@ export {
   RenderEvent,
   ShouldRender,
   PropsEvent,
+  BeforeRenderEvent,
 } from "./runner/events.ts";
 
 export type IComponent = Runner.IComponent;

@@ -8,6 +8,16 @@ export class LoadedEvent extends Event {
   }
 }
 
+export class BeforeRenderEvent extends Event {
+  constructor() {
+    super(BeforeRenderEvent.Key, { bubbles: false });
+  }
+
+  static get Key() {
+    return "before-render";
+  }
+}
+
 export class RenderEvent extends Event {
   constructor() {
     super(RenderEvent.Key, { bubbles: false });
