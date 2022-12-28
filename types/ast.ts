@@ -21,9 +21,14 @@ export namespace Ast {
   export namespace Css {
     export type AtStatement = { rule: string; statement: string };
 
+    export type PropertyBlock = {
+      media?: string;
+      properties: Array<Property>;
+    };
+
     export type Rule = {
       selector: string;
-      properties: Array<Property>;
+      properties: Array<Property | PropertyBlock>;
     };
 
     export type AtBlock = {

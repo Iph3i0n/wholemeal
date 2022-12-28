@@ -1,6 +1,7 @@
 import { Dom } from "../deps.ts";
+import { BuildFunction, CompilerLine, CompilerProperty } from "./builder.ts";
 
-function InsertAttributes(map: Dom.NamedNodeMap) {
+function InsertAttributes(map: Dom.NamedNodeMap): CompilerProperty {
   const array_data = [];
   for (let i = 0; i < map.length; i++) {
     const item = map.item(i);
@@ -8,68 +9,139 @@ function InsertAttributes(map: Dom.NamedNodeMap) {
       array_data.push(item);
   }
 
-  const result = array_data
-    .map((a) =>
-      a.value.startsWith(":")
-        ? `"${a.name}": ${a.value.replace(":", "")}`
-        : `"${a.name}": "${a.value}"`
-    )
-    .join(",");
-
-  return "{" + result + "}";
+  return {
+    type: "object",
+    data: array_data.reduce(
+      (c, n) => ({
+        ...c,
+        [n.name]: {
+          type: n.value.startsWith(":") ? "computed" : "string",
+          data: n.value.startsWith(":") ? n.value.replace(":", "") : n.value,
+        },
+      }),
+      {} as Record<string, CompilerProperty>
+    ),
+  };
 }
 
-function InsertHandlers(map: Dom.NamedNodeMap) {
+function InsertHandlers(map: Dom.NamedNodeMap): CompilerProperty {
   const array_data = [];
   for (let i = 0; i < map.length; i++) {
     const item = map.item(i);
     if (item && item.name.startsWith("on:")) array_data.push(item);
   }
 
-  const result = array_data
-    .map((a) => `"${a.name.replace("on:", "")}": handle(${a.value})`)
-    .join(",");
-
-  return "{" + result + "}";
+  return {
+    type: "object",
+    data: array_data.reduce(
+      (c, n) => ({
+        ...c,
+        [n.name.replace("on:", "")]: {
+          type: "call",
+          args: [{ type: "computed", data: n.value }],
+          definition: { type: "computed", data: "handle" },
+        },
+      }),
+      {} as Record<string, CompilerProperty>
+    ),
+  };
 }
 
-function InsertElement(element: Dom.Element): string {
+function InsertElement(element: Dom.Element): Array<CompilerLine> {
   const attr = (key: string) => element.getAttribute(key);
   if (element.tagName.toLowerCase() === "s:if")
-    return `...(${attr("check")?.replace(":", "")} ? ${InsertChildren(
-      element.childNodes
-    )} : [])`;
+    return [
+      {
+        type: "if",
+        check: {
+          type: "computed",
+          data: attr("check")?.replace(":", "") ?? "",
+        },
+        data: InsertChildren(element.childNodes),
+      },
+    ];
 
   if (element.tagName.toLowerCase() === "s:for")
-    return `...(${attr("subject")?.replace(":", "")}).flatMap((${
-      attr("key") ?? "ctx"
-    }) => (${InsertChildren(element.childNodes)}))`;
+    return [
+      {
+        type: "for",
+        key: attr("key") ?? "ctx",
+        value: {
+          type: "computed",
+          data: attr("subject")?.replace(":", "") ?? "",
+        },
+        accessor: "of",
+        data: InsertChildren(element.childNodes),
+      },
+    ];
 
   if (element.tagName.toLowerCase() === "s:use")
-    return `...((${attr("as")}) => (${InsertChildren(
-      element.childNodes
-    )}))(${attr("get")?.replace(":", "")})`;
+    return [
+      {
+        type: "spread-insert",
+        data: {
+          type: "call",
+          args: [
+            { type: "computed", data: attr("get")?.replace(":", "") ?? "" },
+          ],
+          definition: {
+            type: "function",
+            args: attr("as") ?? "",
+            data: InsertChildren(element.childNodes),
+          },
+        },
+      },
+    ];
 
   if (element.tagName.toLowerCase() === "s:text")
-    return attr("use")?.replace(":", "") ?? "";
+    return [
+      {
+        type: "insert",
+        data: { type: "computed", data: attr("use")?.replace(":", "") ?? "" },
+      },
+    ];
 
-  const ref_data = element.getAttribute("s:ref")
-    ? `ref: ${element.getAttribute("s:ref")},`
-    : "";
-
-  return `{
-    tag: "${element.tagName.toLowerCase()}",
-    attr: ${InsertAttributes(element.attributes)},
-    ${ref_data}
-    handlers: ${InsertHandlers(element.attributes)},
-    children: ${InsertChildren(element.childNodes)}
-  }`;
+  return [
+    {
+      type: "insert",
+      data: {
+        type: "object",
+        data: {
+          tag: { type: "string", data: element.tagName.toLowerCase() },
+          attr: InsertAttributes(element.attributes),
+          handlers: InsertHandlers(element.attributes),
+          children: {
+            type: "call",
+            args: [],
+            definition: {
+              type: "function",
+              data: InsertChildren(element.childNodes),
+            },
+          },
+          ...(attr("s:ref")
+            ? {
+                ref: { type: "computed", data: attr("s:ref") ?? "" },
+              }
+            : {}),
+        },
+      },
+    },
+  ];
 }
 
-function InsertText(text: Dom.Text) {
+function InsertText(text: Dom.Text): Array<CompilerLine> {
   if (text.textContent.trim())
-    return `"${text.textContent.trim().replaceAll("\n", " ")}"`;
-  return undefined;
+    return [
+      {
+        type: "insert",
+        data: {
+          type: "string",
+          data: text.textContent.trim().replaceAll("\n", " "),
+        },
+      },
+    ];
+
+  return [];
 }
 
 function IsElement(node: Dom.Node): node is Dom.Element {
@@ -80,22 +152,46 @@ function IsText(node: Dom.Node): node is Dom.Text {
   return node.nodeType === node.TEXT_NODE;
 }
 
-function InsertNode(node: Dom.Node) {
+function InsertNode(node: Dom.Node): Array<CompilerLine> {
   if (IsElement(node)) return InsertElement(node);
   else if (IsText(node)) return InsertText(node);
 
-  return undefined;
+  return [];
 }
 
-function InsertChildren(children: Dom.NodeList) {
+function InsertChildren(children: Dom.NodeList): Array<CompilerLine> {
   const result = [];
-  for (const node of children) result.push(InsertNode(node));
+  for (const node of children) result.push(...InsertNode(node));
 
-  return "[" + result.filter((r) => r).join(",") + "]";
+  return result;
 }
 
 export default function Compile(data: Dom.HTMLDocument) {
+  // if (data.body.childNodes.length === 0)
+  //   return `() => [{ tag: "slot", attr: {}, handlers: {}, children: [] }]`;
+  // return InsertChildren(data.body.childNodes);
+
   if (data.body.childNodes.length === 0)
-    return `[{ tag: "slot", attr: {}, handlers: {}, children: [] }]`;
-  return InsertChildren(data.body.childNodes);
+    return BuildFunction({
+      type: "function",
+      data: [
+        {
+          type: "insert",
+          data: {
+            type: "object",
+            data: {
+              tag: { type: "string", data: "slot" },
+              attr: { type: "object", data: {} },
+              handlers: { type: "object", data: {} },
+              children: { type: "array", data: [] },
+            },
+          },
+        },
+      ],
+    });
+
+  return BuildFunction({
+    type: "function",
+    data: InsertChildren(data.body.childNodes),
+  });
 }

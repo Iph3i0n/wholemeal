@@ -32,7 +32,7 @@ async function Main() {
           import RenderSheet from "${import.meta.resolve("./runner/css.ts")}";
           import GlobalCss from "${project.global_css}";
           const style = document.createElement("style");
-          style.innerHTML = RenderSheet(GlobalCss);
+          style.innerHTML = RenderSheet(GlobalCss());
           document.head.append(style);`,
         loader: "ts",
         resolveDir: Path.resolve(CWD),

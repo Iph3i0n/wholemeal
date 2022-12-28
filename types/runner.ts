@@ -1,20 +1,16 @@
-// deno-lint-ignore-file no-explicit-any
 import { Ast } from "./ast.ts";
 
 // deno-lint-ignore no-namespace
 export namespace Runner {
   export interface IComponent extends HTMLElement {
     readonly props: Record<string, string>;
-    set_flag(key: string, value: any): void;
-    get_flag(key: string): any;
     readonly internals: ElementInternals;
     readonly root: ShadowRoot;
   }
 
   export type ComponentFunction = (
-    this: IComponent,
-    render: (comp: Ast.Component) => void
-  ) => Promise<() => void>;
+    this: IComponent
+  ) => Promise<{ html: () => Ast.Html.Dom; css: () => Ast.Css.Sheet }>;
 
   export type Project = {
     templates: Array<string>;

@@ -12,26 +12,27 @@ function BuildTemplate(data: {
     import { CreateComponent } from "${import.meta.resolve(
       "../runner/component.ts"
     )}";
+    import {
+      LoadedEvent,
+      RenderEvent,
+      ShouldRender,
+      PropsEvent,
+      CreateRef
+    } from "${import.meta.resolve("../mod.ts")}";
     ${data.metadata}
 
-    async function Component(render) {
+    async function Component() {
       const self = this;
       const handle = (handler) => (e) => {
         handler.bind(this)(e);
-        call_render();
+        self.dispatchEvent(new ShouldRender());
       };
 
       ${data.main}
-
-      const call_render = async () => {
-        render({
-          html: ${data.html},
-          css: ${data.css},
-        });
+      return {
+        html: ${data.html},
+        css: ${data.css},
       };
-
-      call_render();
-      return call_render;
     };
 
     CreateComponent(

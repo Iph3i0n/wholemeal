@@ -45,9 +45,8 @@ export function CreateComponent(
 
     readonly #root: ShadowRoot;
     readonly #internals: ElementInternals;
-    #redraw: () => void = () => {};
-    // deno-lint-ignore no-explicit-any
-    readonly #flags: Record<string, any> = {};
+    #html: () => Ast.Html.Dom;
+    #css: () => Ast.Css.Sheet;
 
     static get observedAttributes() {
       return [...schema.props];
@@ -57,6 +56,8 @@ export function CreateComponent(
       super();
       this.#root = this.attachShadow({ mode: "open" });
       this.#internals = this.attachInternals();
+      this.#html = () => [];
+      this.#css = () => [];
 
       // deno-lint-ignore no-explicit-any
       const internals: any = this.#internals;
@@ -77,34 +78,29 @@ export function CreateComponent(
       return ProcessProps(props);
     }
 
-    get_flag(name: string) {
-      return this.#flags[name];
-    }
-
-    // deno-lint-ignore no-explicit-any
-    set_flag(name: string, value: any) {
-      this.#flags[name] = value;
-      this.#redraw();
-    }
-
     querySelector(selector: string) {
       return this.#root.querySelector(selector);
     }
 
-    #render(comp: Ast.Component) {
-      HydrateFrom(comp.html, RenderSheet(comp.css), this.#root);
+    #render() {
+      HydrateFrom(this.#html(), RenderSheet(this.#css()), this.#root);
       this.dispatchEvent(new RenderEvent());
     }
 
     async connectedCallback() {
-      this.#redraw = await comp.bind(this)((c) => this.#render(c));
-      this.addEventListener(ShouldRender.Key, () => this.#redraw());
+      const result = await comp.bind(this)();
+      this.#html = result.html;
+      this.#css = result.css;
+      this.#render();
+      this.addEventListener(ShouldRender.Key, () => this.#render());
       this.dispatchEvent(new LoadedEvent());
     }
 
     attributeChangedCallback(name: string, old: string, next: string) {
-      this.#redraw();
-      this.dispatchEvent(new PropsEvent(name, PropValue(old), PropValue(next)));
+      const props_event = new PropsEvent(name, PropValue(old), PropValue(next));
+      this.dispatchEvent(props_event);
+      if (props_event.defaultPrevented) return;
+      this.dispatchEvent(new ShouldRender());
     }
 
     get internals() {
