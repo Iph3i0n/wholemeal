@@ -24,7 +24,3 @@ export function RenderNode(node: Ast.Html.Node) {
   if (typeof node === "string") return RenderText(node);
   return RenderElement(node);
 }
-
-export default function RenderDom(dom: Ast.Html.Dom) {
-  return dom.map(RenderNode);
-}

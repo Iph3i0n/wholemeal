@@ -1,4 +1,3 @@
-export * as Testing from "https://deno.land/std@0.165.0/testing/asserts.ts";
 export * from "https://deno.land/x/type_guard@2.3.3/index.ts";
 export * as Path from "https://deno.land/std@0.162.0/path/mod.ts";
 export { default as Yargs } from "https://deno.land/x/yargs@v17.6.2-deno/deno.ts";

@@ -4,7 +4,7 @@ import "https://cdn.jsdelivr.net/npm/form-request-submit-polyfill";
 import { Runner } from "../types/runner.ts";
 import { Ast } from "../types/ast.ts";
 import ObjectUtils from "./object.ts";
-import HydrateFrom from "./hydrator.ts";
+import VirtualDom from "./virtual-node.ts";
 import RenderSheet from "./css.ts";
 import {
   LoadedEvent,
@@ -46,6 +46,9 @@ export function CreateComponent(
 
     readonly #root: ShadowRoot;
     readonly #internals: ElementInternals;
+    readonly #styles: HTMLStyleElement;
+    readonly #virtual_dom: VirtualDom;
+
     #html: () => Ast.Html.Dom;
     #css: () => Ast.Css.Sheet;
 
@@ -59,6 +62,9 @@ export function CreateComponent(
       this.#internals = this.attachInternals();
       this.#html = () => [];
       this.#css = () => [];
+      this.#styles = document.createElement("style");
+      this.#root.append(this.#styles);
+      this.#virtual_dom = new VirtualDom(this.#root);
 
       // deno-lint-ignore no-explicit-any
       const internals: any = this.#internals;
@@ -79,13 +85,19 @@ export function CreateComponent(
       return ProcessProps(props);
     }
 
+    set styles(data: string) {
+      this.#styles.innerHTML = data;
+    }
+
     querySelector(selector: string) {
       return this.#root.querySelector(selector);
     }
 
     #render() {
       this.dispatchEvent(new BeforeRenderEvent());
-      HydrateFrom(this.#html(), RenderSheet(this.#css()), this.#root);
+
+      this.styles = RenderSheet(this.#css());
+      this.#virtual_dom.Merge(this.#html());
       this.dispatchEvent(new RenderEvent());
     }
 

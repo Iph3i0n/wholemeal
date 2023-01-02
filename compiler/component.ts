@@ -1,6 +1,6 @@
 import { Dom } from "../deps.ts";
+import Sheet from "../pss/sheet.ts";
 import CompileDom from "./dom.ts";
-import CompileCss from "./css/mod.ts";
 
 function BuildTemplate(data: {
   main?: string;
@@ -85,8 +85,8 @@ export default function Compile(component: string) {
 
   return BuildTemplate({
     main,
-    html: CompileDom(dom),
-    css: CompileCss(css ?? ""),
+    html: CompileDom(dom).toString(),
+    css: new Sheet(css).JavaScript.toString(),
     metadata,
   });
 }

@@ -1,7 +1,7 @@
 import { Path, DenoLoader, Yargs, EsBuild } from "./deps.ts";
 import Compile from "./compiler/component.ts";
-import CompileCss from "./compiler/css/mod.ts";
 import { Runner } from "./types/runner.ts";
+import Sheet from "./pss/sheet.ts";
 
 const args = Yargs(Deno.args).parse();
 
@@ -80,7 +80,8 @@ async function Main() {
             build.onLoad({ filter: /\.pss$/ }, async (args) => {
               const data = await Deno.readTextFile(args.path);
               return {
-                contents: "module.exports = " + CompileCss(data),
+                contents:
+                  "module.exports = " + new Sheet(data).JavaScript.toString(),
                 loader: "js",
               };
             });

@@ -1,5 +1,5 @@
 import StringIterator from "./string-iterator.ts";
-import { Testing } from "../../deps.ts";
+import { A } from "../test-deps.ts";
 
 Deno.test("Parses a complex statement", () => {
   const iterator =
@@ -10,5 +10,5 @@ Deno.test("Parses a complex statement", () => {
 
   const result = iterator.GetUntil("{");
 
-  Testing.assertEquals(result, '":`.progress:nth-child(${index + 1})`" ');
+  A.assertEquals(result, '":`.progress:nth-child(${index + 1})`" ');
 });
