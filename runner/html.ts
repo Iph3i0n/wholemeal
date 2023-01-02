@@ -24,3 +24,7 @@ export function RenderNode(node: Ast.Html.Node) {
   if (typeof node === "string") return RenderText(node);
   return RenderElement(node);
 }
+
+export function RenderChildren(element: Ast.Html.Element) {
+  return element.children.map(RenderNode);
+}

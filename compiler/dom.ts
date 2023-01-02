@@ -98,6 +98,11 @@ function InsertElement(element: Dom.Element) {
             ref: new ReferenceWriter(attr("s:ref") ?? ""),
           }
         : {}),
+      ...(attr("s:vdom")
+        ? {
+            vdom: new StringWriter(attr("s:vdom") ?? ""),
+          }
+        : {}),
       children: new CallWriter(
         new FunctionWriter(
           [],

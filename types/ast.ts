@@ -6,6 +6,7 @@ export namespace Ast {
       tag: string;
       attr: Record<string, string>;
       ref?: { current?: HTMLElement };
+      vdom?: "ignore";
       handlers: Record<string, (e: Event) => void>;
       children: Array<Node>;
     };

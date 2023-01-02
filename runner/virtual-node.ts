@@ -1,6 +1,6 @@
 import { Ast } from "../types/ast.ts";
 import EventManager from "./event-manager.ts";
-import { RenderText } from "./html.ts";
+import { RenderChildren, RenderText } from "./html.ts";
 
 abstract class VirtualNode<TNode extends Ast.Html.Node> {
   node: TNode;
@@ -37,11 +37,14 @@ class VirtualElement extends VirtualNode<Ast.Html.Element> {
 
     if (node.ref) node.ref.current = result;
 
-    for (const child of node.children) {
-      const input = create_input(child);
-      result.append(input.Node);
-      this.children.push(input);
-    }
+    if (node.vdom === "ignore")
+      result.replaceChildren(...RenderChildren(node));
+    else
+      for (const child of node.children) {
+        const input = create_input(child);
+        result.append(input.Node);
+        this.children.push(input);
+      }
 
     this.#element = result;
   }
