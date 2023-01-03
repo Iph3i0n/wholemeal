@@ -1,18 +1,17 @@
-// deno-lint-ignore-file no-explicit-any
+// deno-lint-ignore-file no-explicit-any no-prototype-builtins
 export default {
   Keys<T extends Record<string, unknown>>(subject: T): (keyof T)[] {
     return Object.keys(subject) as any;
   },
-  MapKeys<T extends Record<string, unknown>, TResult extends { [TKey in keyof T]: unknown }>(
+  MapKeys<
+    T extends Record<string, unknown>,
+    TResult extends { [TKey in keyof T]: any }
+  >(
     subject: T,
     mapper: <TKey extends keyof T>(key: TKey, value: T[TKey]) => TResult[TKey]
   ): TResult {
     const result = {} as any;
-    for (const key in subject)
-      // deno-lint-ignore no-prototype-builtins
-      if (!subject.hasOwnProperty(key)) continue;
-      else result[key] = mapper(key, subject[key]);
-
+    for (const key in subject) result[key] = mapper(key, subject[key]);
     return result;
   },
   MapArrayAsKeys<T extends string, TResult>(
@@ -32,12 +31,12 @@ export default {
   DeepMerge<T extends Record<string, unknown>>(item1: T, item2: any): T {
     const result = {} as any;
     for (const key in item1)
-      // deno-lint-ignore no-prototype-builtins
       if (!item1.hasOwnProperty(key)) continue;
       else if (typeof item1[key] !== "object")
         if (item2[key]) result[key] = item2[key];
         else result[key] = item1[key];
-      else if (item2[key]) result[key] = { ...(item1[key] as any), ...item2[key] };
+      else if (item2[key])
+        result[key] = { ...(item1[key] as any), ...item2[key] };
       else result[key] = item1[key];
 
     return result;

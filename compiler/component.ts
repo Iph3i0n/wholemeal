@@ -39,7 +39,7 @@ function BuildTemplate(data: {
     CreateComponent(
       {
         name,
-        props: typeof props === "object" ? props : [],
+        props: typeof props === "object" ? props : {},
         form: typeof form === "boolean" ? form : false,
         base: typeof base === "function" ? base : HTMLElement,
         extends: typeof extension === "string" ? extension : undefined,

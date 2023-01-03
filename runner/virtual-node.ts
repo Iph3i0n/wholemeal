@@ -29,16 +29,14 @@ class VirtualElement extends VirtualNode<Ast.Html.Element> {
 
     const result = document.createElement(node.tag);
     for (const key in node.attr)
-      if (node.attr[key] !== undefined)
-        result.setAttribute(key, node.attr[key]);
+      if (node.attr[key] != null) result.setAttribute(key, node.attr[key]);
 
     const manager = new EventManager(result);
     for (const key in node.handlers) manager.Add(key, node.handlers[key]);
 
     if (node.ref) node.ref.current = result;
 
-    if (node.vdom === "ignore")
-      result.replaceChildren(...RenderChildren(node));
+    if (node.vdom === "ignore") result.replaceChildren(...RenderChildren(node));
     else
       for (const child of node.children) {
         const input = create_input(child);
@@ -62,7 +60,9 @@ class VirtualElement extends VirtualNode<Ast.Html.Element> {
     for (const key in next.attr) {
       const value = next.attr[key];
       const existing = this.#element.getAttribute(key);
-      if (existing !== value) this.#element.setAttribute(key, value);
+      if (existing !== value)
+        if (value != null) this.#element.setAttribute(key, value);
+        else this.#element.removeAttribute(key);
     }
 
     for (let i = this.#element.attributes.length - 1; i >= 0; i--) {

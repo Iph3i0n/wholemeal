@@ -14,25 +14,21 @@ import {
   BeforeRenderEvent,
 } from "./events.ts";
 
-function PropValue(value: string) {
+// deno-lint-ignore no-explicit-any
+function PropValue(value: string): any {
   return value === ""
     ? true
     : value === "true"
     ? true
     : value === "false"
     ? false
-    : // deno-lint-ignore no-explicit-any
-      (value as any);
-}
-
-function ProcessProps(props: Record<string, string>): Record<string, string> {
-  return ObjectUtils.MapKeys(props, (_, value) => PropValue(value));
+    : value;
 }
 
 export function CreateComponent(
   schema: {
     name: string;
-    props: Array<string>;
+    props: Record<string, string>;
     form?: boolean;
     base: new () => HTMLElement;
     extends?: string;
@@ -53,7 +49,7 @@ export function CreateComponent(
     #css: () => Ast.Css.Sheet;
 
     static get observedAttributes() {
-      return [...schema.props];
+      return Object.keys(schema.props);
     }
 
     constructor() {
@@ -74,15 +70,11 @@ export function CreateComponent(
     }
 
     get props() {
-      const props: Record<string, string> = {};
-      for (let i = 0; i < this.attributes.length; i++) {
-        const attribute = this.attributes.item(i);
-        if (!attribute) continue;
-
-        props[attribute.name] = attribute.value;
-      }
-
-      return ProcessProps(props);
+      return ObjectUtils.MapKeys(schema.props, (k, v) =>
+        typeof v === "boolean"
+          ? !!(this.getAttribute(k) ?? v) || (this.getAttribute(k) ?? v) === ""
+          : this.getAttribute(k) ?? v
+      );
     }
 
     set styles(data: string) {

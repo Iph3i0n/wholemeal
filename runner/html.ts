@@ -4,8 +4,7 @@ import EventManager from "./event-manager.ts";
 export function RenderElement(element: Ast.Html.Element) {
   const result = document.createElement(element.tag);
   for (const key in element.attr)
-    if (element.attr[key] !== undefined)
-      result.setAttribute(key, element.attr[key]);
+    if (element.attr[key] != null) result.setAttribute(key, element.attr[key]);
 
   const manager = new EventManager(result);
   for (const key in element.handlers) manager.Add(key, element.handlers[key]);
