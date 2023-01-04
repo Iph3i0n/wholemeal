@@ -25,7 +25,12 @@ export class PssRule extends PssBlock {
 
   get #selector() {
     const iterator = new StringIterator(this.#data);
-    return iterator.GetUntil("{").trim();
+    const result = iterator.GetUntil("{").trim();
+    if (result.startsWith('":')) {
+      return new ReferenceWriter(result.substring(2, result.length - 1));
+    }
+
+    return new StringWriter(result);
   }
 
   get #properties() {
@@ -43,7 +48,7 @@ export class PssRule extends PssBlock {
       new CallWriter(
         new AccessWriter("push", new ReferenceWriter("result")),
         new ObjectWriter({
-          selector: new StringWriter(this.#selector),
+          selector: this.#selector,
           properties: new ArrayWriter(
             ...this.#properties.map((p) => p.JavaScript)
           ),
