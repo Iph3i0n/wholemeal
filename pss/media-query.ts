@@ -1,7 +1,6 @@
-import StringWriter from "../writer/string.ts";
 import StringIterator from "../compiler-utils/string-iterator.ts";
 import Sheet from "./sheet.ts";
-import ReferenceWriter from "../writer/reference.ts";
+import * as Js from "../writer/mod.ts";
 import { PssBlock } from "./block.ts";
 
 export class PssMediaQuery extends PssBlock {
@@ -20,9 +19,9 @@ export class PssMediaQuery extends PssBlock {
     const iterator = new StringIterator(this.#data);
     const result = iterator.GetUntil("{").replace("@media", "").trim();
     if (result.startsWith('":'))
-      return new ReferenceWriter(result.substring(2, result.length - 1));
+      return new Js.Reference(result.substring(2, result.length - 1));
 
-    return new StringWriter(result);
+    return new Js.String(result);
   }
 
   get #sheet() {

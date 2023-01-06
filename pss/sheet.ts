@@ -1,11 +1,5 @@
 import Code from "../compiler-utils/code-transform.ts";
-import ArrayWriter from "../writer/array.ts";
-import BaseWriter from "../writer/base.ts";
-import BlockWriter from "../writer/block.ts";
-import DeclareWriter from "../writer/declare.ts";
-import FunctionWriter from "../writer/function.ts";
-import ReferenceWriter from "../writer/reference.ts";
-import ReturnWriter from "../writer/return.ts";
+import * as Js from "../writer/mod.ts";
 import { PssAtBlock } from "./at-block.ts";
 import { PssAtStatement } from "./at-statement.ts";
 import { PssForBlock } from "./for-block.ts";
@@ -17,9 +11,9 @@ import { PssRule } from "./rule.ts";
 
 export default class Sheet {
   readonly #data: Code;
-  readonly #media: BaseWriter | undefined;
+  readonly #media: Js.Any | undefined;
 
-  constructor(data: string, media?: BaseWriter) {
+  constructor(data: string, media?: Js.Any) {
     this.#data = new Code(data);
     this.#media = media;
   }
@@ -42,19 +36,19 @@ export default class Sheet {
   }
 
   get JavaScript() {
-    return new FunctionWriter(
+    return new Js.Function(
       [],
       "arrow",
       undefined,
-      new BlockWriter(
-        new DeclareWriter("const", "result", new ArrayWriter()),
+      new Js.Block(
+        new Js.Declare("const", "result", new Js.Array()),
         ...this.InlineJavaScript,
-        new ReturnWriter(new ReferenceWriter("result"))
+        new Js.Return(new Js.Reference("result"))
       )
     );
   }
 
-  get InlineJavaScript(): Array<BaseWriter> {
+  get InlineJavaScript(): Array<Js.Any> {
     return [...this.#parts()].flatMap((p) => p.JavaScript);
   }
 }

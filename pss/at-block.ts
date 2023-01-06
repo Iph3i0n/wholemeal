@@ -1,12 +1,7 @@
 import StringIterator from "../compiler-utils/string-iterator.ts";
 import Sheet from "./sheet.ts";
 import { PssBlock } from "./block.ts";
-import BaseWriter from "../writer/base.ts";
-import StringWriter from "../writer/string.ts";
-import ObjectWriter from "../writer/object.ts";
-import CallWriter from "../writer/call.ts";
-import AccessWriter from "../writer/access.ts";
-import ReferenceWriter from "../writer/reference.ts";
+import * as Js from "../writer/mod.ts";
 
 export class PssAtBlock extends PssBlock {
   static IsValid(data: string) {
@@ -14,9 +9,9 @@ export class PssAtBlock extends PssBlock {
   }
 
   readonly #data: string;
-  readonly #media: BaseWriter | undefined;
+  readonly #media: Js.Any | undefined;
 
-  constructor(data: string, media?: BaseWriter) {
+  constructor(data: string, media?: Js.Any) {
     super();
     this.#data = data;
     this.#media = media;
@@ -44,14 +39,14 @@ export class PssAtBlock extends PssBlock {
     );
   }
 
-  get JavaScript(): Array<BaseWriter> {
+  get JavaScript(): Array<Js.Any> {
     return [
-      new CallWriter(
-        new AccessWriter("push", new ReferenceWriter("result")),
-        new ObjectWriter({
-          variant: new StringWriter(this.#variant),
-          query: new StringWriter(this.#statement),
-          children: new CallWriter(this.#sheet.JavaScript),
+      new Js.Call(
+        new Js.Access("push", new Js.Reference("result")),
+        new Js.Object({
+          variant: new Js.String(this.#variant),
+          query: new Js.String(this.#statement),
+          children: new Js.Call(this.#sheet.JavaScript),
         })
       ),
     ];

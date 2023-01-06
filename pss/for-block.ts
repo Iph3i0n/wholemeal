@@ -1,10 +1,7 @@
 import StringIterator from "../compiler-utils/string-iterator.ts";
 import Sheet from "./sheet.ts";
-import ReferenceWriter from "../writer/reference.ts";
+import * as Js from "../writer/mod.ts";
 import { PssBlock } from "./block.ts";
-import BaseWriter from "../writer/base.ts";
-import BlockWriter from "../writer/block.ts";
-import GenericForWriter from "../writer/generic-for.ts";
 
 export class PssForBlock extends PssBlock {
   static IsValid(data: string) {
@@ -12,9 +9,9 @@ export class PssForBlock extends PssBlock {
   }
 
   readonly #data: string;
-  readonly #media: BaseWriter | undefined;
+  readonly #media: Js.Any | undefined;
 
-  constructor(data: string, media?: BaseWriter) {
+  constructor(data: string, media?: Js.Any) {
     super();
     this.#data = data;
     this.#media = media;
@@ -24,7 +21,7 @@ export class PssForBlock extends PssBlock {
     const iterator = new StringIterator(this.#data);
     const result = iterator.GetUntil("{").replace("@for", "").trim();
 
-    return new ReferenceWriter(result);
+    return new Js.Reference(result);
   }
 
   get #sheet() {
@@ -37,11 +34,11 @@ export class PssForBlock extends PssBlock {
     );
   }
 
-  get JavaScript(): Array<BaseWriter> {
+  get JavaScript(): Array<Js.Any> {
     return [
-      new GenericForWriter(
+      new Js.GenericFor(
         this.#statement,
-        new BlockWriter(...this.#sheet.InlineJavaScript)
+        new Js.Block(...this.#sheet.InlineJavaScript)
       ),
     ];
   }

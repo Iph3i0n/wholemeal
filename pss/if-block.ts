@@ -1,10 +1,7 @@
 import StringIterator from "../compiler-utils/string-iterator.ts";
 import Sheet from "./sheet.ts";
-import ReferenceWriter from "../writer/reference.ts";
+import * as Js from "../writer/mod.ts";
 import { PssBlock } from "./block.ts";
-import BaseWriter from "../writer/base.ts";
-import IfWriter from "../writer/if.ts";
-import BlockWriter from "../writer/block.ts";
 
 export class PssIfBlock extends PssBlock {
   static IsValid(data: string) {
@@ -12,9 +9,9 @@ export class PssIfBlock extends PssBlock {
   }
 
   readonly #data: string;
-  readonly #media: BaseWriter | undefined;
+  readonly #media: Js.Any | undefined;
 
-  constructor(data: string, media?: BaseWriter) {
+  constructor(data: string, media?: Js.Any) {
     super();
     this.#data = data;
     this.#media = media;
@@ -24,7 +21,7 @@ export class PssIfBlock extends PssBlock {
     const iterator = new StringIterator(this.#data);
     const result = iterator.GetUntil("{").replace("@if", "").trim();
 
-    return new ReferenceWriter(result);
+    return new Js.Reference(result);
   }
 
   get #sheet() {
@@ -37,12 +34,9 @@ export class PssIfBlock extends PssBlock {
     );
   }
 
-  get JavaScript(): Array<BaseWriter> {
+  get JavaScript(): Array<Js.Any> {
     return [
-      new IfWriter(
-        this.#check,
-        new BlockWriter(...this.#sheet.InlineJavaScript)
-      ),
+      new Js.If(this.#check, new Js.Block(...this.#sheet.InlineJavaScript)),
     ];
   }
 }

@@ -1,10 +1,5 @@
 import { PssBlock } from "./block.ts";
-import BaseWriter from "../writer/base.ts";
-import ReferenceWriter from "../writer/reference.ts";
-import CallWriter from "../writer/call.ts";
-import AccessWriter from "../writer/access.ts";
-import SpreadWriter from "../writer/spread.ts";
-import StringWriter from "../writer/string.ts";
+import * as Js from "../writer/mod.ts";
 
 export class PssInsertStatement extends PssBlock {
   static IsValid(data: string) {
@@ -22,15 +17,15 @@ export class PssInsertStatement extends PssBlock {
     return this.#data.replace("@insert", "").trim();
   }
 
-  get JavaScript(): Array<BaseWriter> {
+  get JavaScript(): Array<Js.Any> {
     return [
-      new CallWriter(
-        new AccessWriter("push", new ReferenceWriter("result")),
-        new SpreadWriter(
-          new CallWriter(
-            new CallWriter(
-              new ReferenceWriter("require"),
-              new StringWriter(this.#statement)
+      new Js.Call(
+        new Js.Access("push", new Js.Reference("result")),
+        new Js.Spread(
+          new Js.Call(
+            new Js.Call(
+              new Js.Reference("require"),
+              new Js.String(this.#statement)
             )
           )
         )

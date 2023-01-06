@@ -1,6 +1,5 @@
 import { PssBlock } from "./block.ts";
-import BaseWriter from "../writer/base.ts";
-import ReferenceWriter from "../writer/reference.ts";
+import * as Js from "../writer/mod.ts";
 
 export class PssJsStatement extends PssBlock {
   static IsValid(data: string) {
@@ -18,7 +17,7 @@ export class PssJsStatement extends PssBlock {
     return this.#data.replace("@js", "").trim();
   }
 
-  get JavaScript(): Array<BaseWriter> {
-    return [new ReferenceWriter(this.#statement)];
+  get JavaScript(): Array<Js.Any> {
+    return [new Js.Reference(this.#statement)];
   }
 }

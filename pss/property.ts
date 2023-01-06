@@ -1,16 +1,11 @@
-import ArrayWriter from "../writer/array.ts";
-import CallWriter from "../writer/call.ts";
-import ObjectWriter from "../writer/object.ts";
-import ReferenceWriter from "../writer/reference.ts";
-import StringWriter from "../writer/string.ts";
+import * as Js from "../writer/mod.ts";
 import StringIterator from "../compiler-utils/string-iterator.ts";
-import BaseWriter from "../writer/base.ts";
 
 export class PssProperty {
   readonly #data: string;
-  readonly #media: BaseWriter | undefined;
+  readonly #media: Js.Any | undefined;
 
-  constructor(data: string, media: BaseWriter | undefined) {
+  constructor(data: string, media: Js.Any | undefined) {
     this.#data = data;
     this.#media = media;
   }
@@ -41,21 +36,21 @@ export class PssProperty {
   get JavaScript() {
     if (!this.#is_function) {
       const { id, value } = this.#basic_data;
-      return new ArrayWriter(
-        new StringWriter(id),
+      return new Js.Array(
+        new Js.String(id),
         value.startsWith('":')
-          ? new ReferenceWriter(value.substring(2, value.length - 1))
-          : new StringWriter(value),
-        this.#media ? this.#media : new ReferenceWriter("undefined")
+          ? new Js.Reference(value.substring(2, value.length - 1))
+          : new Js.String(value),
+        this.#media ? this.#media : new Js.Reference("undefined")
       );
     }
 
     const { name, args } = this.#function_data;
-    return new ObjectWriter({
-      media: this.#media ? this.#media : new ReferenceWriter("undefined"),
-      properties: new CallWriter(
-        new ReferenceWriter(name),
-        ...args.map((a) => new ReferenceWriter(a))
+    return new Js.Object({
+      media: this.#media ? this.#media : new Js.Reference("undefined"),
+      properties: new Js.Call(
+        new Js.Reference(name),
+        ...args.map((a) => new Js.Reference(a))
       ),
     });
   }

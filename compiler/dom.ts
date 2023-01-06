@@ -1,17 +1,5 @@
 import { Dom } from "../deps.ts";
-import AccessWriter from "../writer/access.ts";
-import ArrayWriter from "../writer/array.ts";
-import BaseWriter from "../writer/base.ts";
-import BlockWriter from "../writer/block.ts";
-import CallWriter from "../writer/call.ts";
-import DeclareWriter from "../writer/declare.ts";
-import ForWriter from "../writer/for.ts";
-import FunctionWriter from "../writer/function.ts";
-import IfWriter from "../writer/if.ts";
-import ObjectWriter from "../writer/object.ts";
-import ReferenceWriter from "../writer/reference.ts";
-import ReturnWriter from "../writer/return.ts";
-import StringWriter from "../writer/string.ts";
+import * as Js from "../writer/mod.ts";
 
 function InsertAttributes(map: Dom.NamedNodeMap) {
   const array_data = [];
@@ -21,15 +9,15 @@ function InsertAttributes(map: Dom.NamedNodeMap) {
       array_data.push(item);
   }
 
-  return new ObjectWriter(
+  return new Js.Object(
     array_data.reduce(
       (c, n) => ({
         ...c,
         [n.name]: n.value.startsWith(":")
-          ? new ReferenceWriter(n.value.replace(":", ""))
-          : new StringWriter(n.value),
+          ? new Js.Reference(n.value.replace(":", ""))
+          : new Js.String(n.value),
       }),
-      {} as Record<string, BaseWriter>
+      {} as Record<string, Js.Any>
     )
   );
 }
@@ -41,16 +29,16 @@ function InsertHandlers(map: Dom.NamedNodeMap) {
     if (item && item.name.startsWith("on:")) array_data.push(item);
   }
 
-  return new ObjectWriter(
+  return new Js.Object(
     array_data.reduce(
       (c, n) => ({
         ...c,
-        [n.name.replace("on:", "")]: new CallWriter(
-          new ReferenceWriter("handle"),
-          new ReferenceWriter(n.value)
+        [n.name.replace("on:", "")]: new Js.Call(
+          new Js.Reference("handle"),
+          new Js.Reference(n.value)
         ),
       }),
-      {} as Record<string, BaseWriter>
+      {} as Record<string, Js.Any>
     )
   );
 }
@@ -58,60 +46,60 @@ function InsertHandlers(map: Dom.NamedNodeMap) {
 function InsertElement(element: Dom.Element) {
   const attr = (key: string) => element.getAttribute(key);
   if (element.tagName.toLowerCase() === "s:if")
-    return new IfWriter(
-      new ReferenceWriter(attr("check")?.replace(":", "") ?? ""),
+    return new Js.If(
+      new Js.Reference(attr("check")?.replace(":", "") ?? ""),
       InsertChildren(element.childNodes)
     );
 
   if (element.tagName.toLowerCase() === "s:for")
-    return new ForWriter(
+    return new Js.For(
       attr("key") ?? "ctx",
       "of",
-      new ReferenceWriter(attr("subject")?.replace(":", "") ?? ""),
+      new Js.Reference(attr("subject")?.replace(":", "") ?? ""),
       InsertChildren(element.childNodes)
     );
 
   if (element.tagName.toLowerCase() === "s:use")
-    return new BlockWriter(
-      new DeclareWriter(
+    return new Js.Block(
+      new Js.Declare(
         "const",
         attr("as") ?? "",
-        new ReferenceWriter(attr("get")?.replace(":", "") ?? "")
+        new Js.Reference(attr("get")?.replace(":", "") ?? "")
       ),
       InsertChildren(element.childNodes)
     );
 
   if (element.tagName.toLowerCase() === "s:text")
-    return new CallWriter(
-      new AccessWriter("push", new ReferenceWriter("result")),
-      new ReferenceWriter(attr("use")?.replace(":", "") ?? "")
+    return new Js.Call(
+      new Js.Access("push", new Js.Reference("result")),
+      new Js.Reference(attr("use")?.replace(":", "") ?? "")
     );
 
-  return new CallWriter(
-    new AccessWriter("push", new ReferenceWriter("result")),
-    new ObjectWriter({
-      tag: new StringWriter(element.tagName.toLowerCase()),
+  return new Js.Call(
+    new Js.Access("push", new Js.Reference("result")),
+    new Js.Object({
+      tag: new Js.String(element.tagName.toLowerCase()),
       attr: InsertAttributes(element.attributes),
       handlers: InsertHandlers(element.attributes),
       ...(attr("s:ref")
         ? {
-            ref: new ReferenceWriter(attr("s:ref") ?? ""),
+            ref: new Js.Reference(attr("s:ref") ?? ""),
           }
         : {}),
       ...(attr("s:vdom")
         ? {
-            vdom: new StringWriter(attr("s:vdom") ?? ""),
+            vdom: new Js.String(attr("s:vdom") ?? ""),
           }
         : {}),
-      children: new CallWriter(
-        new FunctionWriter(
+      children: new Js.Call(
+        new Js.Function(
           [],
           "arrow",
           undefined,
-          new BlockWriter(
-            new DeclareWriter("const", "result", new ArrayWriter()),
+          new Js.Block(
+            new Js.Declare("const", "result", new Js.Array()),
             InsertChildren(element.childNodes),
-            new ReturnWriter(new ReferenceWriter("result"))
+            new Js.Return(new Js.Reference("result"))
           )
         )
       ),
@@ -121,9 +109,9 @@ function InsertElement(element: Dom.Element) {
 
 function InsertText(text: Dom.Text) {
   if (text.textContent.trim())
-    return new CallWriter(
-      new AccessWriter("push", new ReferenceWriter("result")),
-      new StringWriter(text.textContent.trim().replaceAll("\n", " "))
+    return new Js.Call(
+      new Js.Access("push", new Js.Reference("result")),
+      new Js.String(text.textContent.trim().replaceAll("\n", " "))
     );
 }
 
@@ -144,40 +132,40 @@ function InsertNode(node: Dom.Node) {
   else if (IsText(node)) return InsertText(node);
 }
 
-function InsertChildren(children: Dom.NodeList): BaseWriter {
-  return new BlockWriter(
+function InsertChildren(children: Dom.NodeList): Js.Any {
+  return new Js.Block(
     ...[...children].map((c) => InsertNode(c)).filter(HasValue)
   );
 }
 
 export default function Compile(data: Dom.HTMLDocument) {
   if (data.body.childNodes.length === 0)
-    return new FunctionWriter(
+    return new Js.Function(
       [],
       "arrow",
       undefined,
-      new BlockWriter(
-        new ReturnWriter(
-          new ArrayWriter(
-            new ObjectWriter({
-              tag: new StringWriter("slot"),
-              attr: new ObjectWriter({}),
-              handlers: new ObjectWriter({}),
-              children: new ArrayWriter(),
+      new Js.Block(
+        new Js.Return(
+          new Js.Array(
+            new Js.Object({
+              tag: new Js.String("slot"),
+              attr: new Js.Object({}),
+              handlers: new Js.Object({}),
+              children: new Js.Array(),
             })
           )
         )
       )
     );
 
-  return new FunctionWriter(
+  return new Js.Function(
     [],
     "arrow",
     undefined,
-    new BlockWriter(
-      new DeclareWriter("const", "result", new ArrayWriter()),
+    new Js.Block(
+      new Js.Declare("const", "result", new Js.Array()),
       InsertChildren(data.body.childNodes),
-      new ReturnWriter(new ReferenceWriter("result"))
+      new Js.Return(new Js.Reference("result"))
     )
   );
 }

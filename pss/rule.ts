@@ -1,13 +1,7 @@
-import ArrayWriter from "../writer/array.ts";
-import ObjectWriter from "../writer/object.ts";
-import StringWriter from "../writer/string.ts";
+import * as Js from "../writer/mod.ts";
 import { PssProperty } from "./property.ts";
 import StringIterator from "../compiler-utils/string-iterator.ts";
-import BaseWriter from "../writer/base.ts";
 import { PssBlock } from "./block.ts";
-import CallWriter from "../writer/call.ts";
-import AccessWriter from "../writer/access.ts";
-import ReferenceWriter from "../writer/reference.ts";
 
 export class PssRule extends PssBlock {
   static IsValid(data: string) {
@@ -15,9 +9,9 @@ export class PssRule extends PssBlock {
   }
 
   readonly #data: string;
-  readonly #media: BaseWriter | undefined;
+  readonly #media: Js.Any | undefined;
 
-  constructor(data: string, media: BaseWriter | undefined) {
+  constructor(data: string, media: Js.Any | undefined) {
     super();
     this.#data = data;
     this.#media = media;
@@ -27,10 +21,10 @@ export class PssRule extends PssBlock {
     const iterator = new StringIterator(this.#data);
     const result = iterator.GetUntil("{").trim();
     if (result.startsWith('":')) {
-      return new ReferenceWriter(result.substring(2, result.length - 1));
+      return new Js.Reference(result.substring(2, result.length - 1));
     }
 
-    return new StringWriter(result);
+    return new Js.String(result);
   }
 
   get #properties() {
@@ -45,11 +39,11 @@ export class PssRule extends PssBlock {
 
   get JavaScript() {
     return [
-      new CallWriter(
-        new AccessWriter("push", new ReferenceWriter("result")),
-        new ObjectWriter({
+      new Js.Call(
+        new Js.Access("push", new Js.Reference("result")),
+        new Js.Object({
           selector: this.#selector,
-          properties: new ArrayWriter(
+          properties: new Js.Array(
             ...this.#properties.map((p) => p.JavaScript)
           ),
         })

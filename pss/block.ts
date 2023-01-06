@@ -1,5 +1,5 @@
-import BaseWriter from "../writer/base.ts";
+import * as Js from "../writer/mod.ts";
 
 export abstract class PssBlock {
-  abstract readonly JavaScript: Array<BaseWriter>;
+  abstract readonly JavaScript: Array<Js.Any>;
 }

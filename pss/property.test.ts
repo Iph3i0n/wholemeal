@@ -1,5 +1,5 @@
 import { A, RunJs } from "../test-deps.ts";
-import StringWriter from "../writer/string.ts";
+import * as Js from "../writer/mod.ts";
 import { PssProperty } from "./property.ts";
 
 Deno.test("Parses a basic property", () => {
@@ -21,7 +21,7 @@ Deno.test("Parses a computed property", () => {
 
 Deno.test("Parses a basic property with media queries", () => {
   A.assertEquals(
-    RunJs(new PssProperty("hello: world", new StringWriter("test")).JavaScript),
+    RunJs(new PssProperty("hello: world", new Js.String("test")).JavaScript),
     ["hello", "world", "test"]
   );
 });
@@ -52,12 +52,9 @@ Deno.test("Parses function calls that contain media queries", () => {
 
 Deno.test("Adds existing media queries", () => {
   A.assertEquals(
-    RunJs(
-      new PssProperty("ctx.test()", new StringWriter("existing")).JavaScript,
-      {
-        test: () => [["hello", "world", "test"]],
-      }
-    ),
+    RunJs(new PssProperty("ctx.test()", new Js.String("existing")).JavaScript, {
+      test: () => [["hello", "world", "test"]],
+    }),
     {
       media: "existing",
       properties: [["hello", "world", "test"]],
