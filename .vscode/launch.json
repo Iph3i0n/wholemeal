@@ -8,7 +8,7 @@
       "request": "launch",
       "name": "Launch Tests",
       "type": "pwa-node",
-      "program": "${workspaceFolder}",
+      "program": "",
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "/home/paul/.deno/bin/deno",
       "runtimeArgs": ["test", "--inspect", "--allow-all"],
