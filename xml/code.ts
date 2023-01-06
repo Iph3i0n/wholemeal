@@ -6,7 +6,7 @@ export default class Code {
   }
 
   *[Symbol.iterator]() {
-    const result = this.#code.split(/(<\/|\/>|<|>|\s)/gm);
-    for (const item of result) if (item.trim()) yield item;
+    const result = this.#code.split(/("[^"]+"|<\/|\/>|<|>|\s)/gm);
+    for (const item of result) if (item) yield item;
   }
 }
