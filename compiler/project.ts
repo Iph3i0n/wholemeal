@@ -30,7 +30,6 @@ export class Project {
       const data = await Deno.readTextFile(this.#path);
       const project: Runner.Project = JSON.parse(data);
 
-      this.#log(`Got project information`);
       const result = await EsBuild.build({
         stdin: {
           contents: `
@@ -65,10 +64,8 @@ export class Project {
               });
 
               build.onLoad({ filter: /\.std$/ }, async (args) => {
-                this.#log(`Started ${args.path}`);
                 const data = await Deno.readTextFile(args.path);
                 const result = new Template(new Component(data)).JavaScript;
-                this.#log(`Compiled ${args.path}`);
                 return {
                   contents: result,
                   loader: "js",
@@ -87,10 +84,8 @@ export class Project {
               });
 
               build.onLoad({ filter: /\.pss$/ }, async (args) => {
-                this.#log(`Started ${args.path}`);
                 const data = await Deno.readTextFile(args.path);
                 const result = new Sheet(data).JavaScript.toString();
-                this.#log(`Compiled ${args.path}`);
                 return {
                   contents: "module.exports = " + result,
                   loader: "js",

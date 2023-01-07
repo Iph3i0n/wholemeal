@@ -51,3 +51,24 @@ Deno.test("Parses whitespace in attributes", () => {
     ]
   );
 });
+
+Deno.test("Ignores script tags", () => {
+  A.assertEquals(
+    [...new Code("<script>Hello world</script>")],
+    ["<", "script", ">", "Hello world", "</", "script", ">"]
+  );
+});
+
+Deno.test("Ignores style tags", () => {
+  A.assertEquals(
+    [...new Code("<style>Hello world</style>")],
+    ["<", "style", ">", "Hello world", "</", "style", ">"]
+  );
+});
+
+Deno.test("Parses new lines in scripts", () => {
+  A.assertEquals(
+    [...new Code(`<script>Hello\nWorld</script>`)],
+    ["<", "script", ">", "Hello\nWorld", "</", "script", ">"]
+  );
+});
