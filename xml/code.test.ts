@@ -8,6 +8,13 @@ Deno.test("Parses a simple code block", () => {
   );
 });
 
+Deno.test("Parses empty strings", () => {
+  A.assertEquals(
+    [...new Code('<div test="">Hello</div>')],
+    ["<", "div", " ", "test", "=", '""', ">", "Hello", "</", "div", ">"]
+  );
+});
+
 Deno.test("Parses a self closing tag", () => {
   A.assertEquals([...new Code("<div />")], ["<", "div", " ", "/>"]);
 });

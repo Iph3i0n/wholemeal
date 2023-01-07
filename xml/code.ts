@@ -1,6 +1,6 @@
 export default class Code {
   static get #splitter() {
-    return /("[^"]+"|<\/|\/>|<|>|\s|=)/gm;
+    return /("[^"]*"|<\/|\/>|<|>|\s|=)/gm;
   }
 
   static get #key_worder() {

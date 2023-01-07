@@ -221,3 +221,65 @@ Deno.test("Parses a self closing tag", () => {
     },
   ]);
 });
+
+Deno.test("Parses a complex script", () => {
+  const builder = new Component(`
+<script>
+  import FormElement from "../form-element.ts";
+  import c from "../classes.ts";
+  import slotted from "../toggleable-slot.ts";
+  import options from "../options.ts";
+
+  export const name = "f-select";
+  export const props = {
+    name: "",
+    required: false,
+    validate: undefined,
+    disabled: false,
+  };
+  export const base = FormElement;
+  export const form = true;
+  export const aria = { Role: "select" };
+
+  const items = options();
+  function current() {
+    return items.data.find((o) => o.value === self.value)?.text ?? "\\xa0";
+  }
+
+  function select(name) {
+    return () => {
+      self.value = name;
+      self.blur();
+    };
+  }
+
+  const slot = slotted();
+</script>
+<div class="title">
+    <img src="/" alt="" />
+</div>
+`);
+
+  const result = RunJs(builder.Html);
+
+  A.assertEquals(result(), [
+    {
+      attr: {
+        class: "title",
+      },
+      children: [
+        {
+          tag: "img",
+          attr: {
+            src: "/",
+            alt: "",
+          },
+          handlers: {},
+          children: [],
+        },
+      ],
+      handlers: {},
+      tag: "div",
+    },
+  ]);
+});
