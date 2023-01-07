@@ -31,7 +31,8 @@ export default class Component {
       .filter(
         (t) => t.trim().startsWith("import") || t.trim().startsWith("export ")
       )
-      .join(";");
+      .join(";")
+      .trim();
   }
 
   get ScriptMain() {
@@ -41,12 +42,13 @@ export default class Component {
         (t) =>
           !(t.trim().startsWith("import") || t.trim().startsWith("export "))
       )
-      .join(";");
+      .join(";")
+      .trim();
   }
 
   get Css() {
     const target = this.#children.find(
-      (c) => c instanceof Element && c.TagName === "script"
+      (c) => c instanceof Element && c.TagName === "style"
     );
     if (!target || !(target instanceof Element)) return new Sheet("");
 

@@ -13,7 +13,9 @@ Deno.test("Parses a basic property", () => {
 Deno.test("Parses a computed property", () => {
   A.assertEquals(
     RunJs(new PssProperty('hello: ":ctx.world"', undefined).JavaScript, {
-      world: "test",
+      ctx: {
+        world: "test",
+      },
     }),
     ["hello", "test", undefined]
   );
@@ -29,7 +31,9 @@ Deno.test("Parses a basic property with media queries", () => {
 Deno.test("Parses function calls", () => {
   A.assertEquals(
     RunJs(new PssProperty("ctx.test()", undefined).JavaScript, {
-      test: () => [["hello", "world"]],
+      ctx: {
+        test: () => [["hello", "world"]],
+      },
     }),
     {
       media: undefined,
@@ -41,7 +45,9 @@ Deno.test("Parses function calls", () => {
 Deno.test("Parses function calls that contain media queries", () => {
   A.assertEquals(
     RunJs(new PssProperty("ctx.test()", undefined).JavaScript, {
-      test: () => [["hello", "world", "test"]],
+      ctx: {
+        test: () => [["hello", "world", "test"]],
+      },
     }),
     {
       media: undefined,
@@ -53,7 +59,9 @@ Deno.test("Parses function calls that contain media queries", () => {
 Deno.test("Adds existing media queries", () => {
   A.assertEquals(
     RunJs(new PssProperty("ctx.test()", new Js.String("existing")).JavaScript, {
-      test: () => [["hello", "world", "test"]],
+      ctx: {
+        test: () => [["hello", "world", "test"]],
+      },
     }),
     {
       media: "existing",

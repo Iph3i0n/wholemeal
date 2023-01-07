@@ -11,15 +11,20 @@ export default class Element extends Node {
   readonly #children: Array<Node> = [];
   readonly #text_content: string = "";
 
+  #error(message: string, context: unknown) {
+    return new Error(`${message}\n${JSON.stringify(context, undefined, 2)}`);
+  }
+
   constructor(code: Code) {
     super();
-    if (code.Current !== "<") throw new Error("Elements must start with a <");
+    if (code.Current !== "<")
+      throw this.#error("Elements must start with a <", {});
     code.Continue("skip-whitespace");
 
     this.#tag = code.Current;
     code.Continue("skip-whitespace");
 
-    while (!code.IsKeyword) {
+    while (!code.Done && !code.IsKeyword) {
       const name = code.Current;
       code.Continue("skip-whitespace");
       if ((code.Current as string) !== "=") {
@@ -29,9 +34,11 @@ export default class Element extends Node {
 
       code.Continue("skip-whitespace");
       if (!code.Current.startsWith('"'))
-        throw new Error(
-          "Attributes values must start with strings\nReceived: " + code.Current
-        );
+        throw this.#error("Attributes values must start with strings", {
+          tag: this.#tag,
+          name,
+          symbol: code.Current,
+        });
 
       this.#attributes[name] = code.Current.substring(
         1,
@@ -41,23 +48,34 @@ export default class Element extends Node {
       code.Continue("skip-whitespace");
     }
 
-    if ((code.Current as string) === "/>") return;
+    if ((code.Current as string) === ">") {
+      code.Continue("skip-whitespace");
+      while (!code.Done && (code.Current as string) !== "</")
+        if (AllText.includes(this.#tag)) {
+          this.#text_content += code.Current;
+          code.Continue();
+        } else if (code.Current === "<") this.#children.push(new Element(code));
+        else this.#children.push(new Text(code));
 
-    code.Continue("skip-whitespace");
-    while ((code.Current as string) !== "</")
-      if (AllText.includes(this.#tag)) {
-        this.#text_content += code.Current;
-        code.Continue();
-      } else if (code.Current === "<") this.#children.push(new Element(code));
-      else this.#children.push(new Text(code));
+      code.Continue("skip-whitespace");
+      if (code.Current !== this.#tag)
+        throw this.#error("Element closing tag mismatch", {
+          tag: this.#tag,
+          attributes: this.#attributes,
+          symbol: code.Current,
+        });
 
-    code.Continue("skip-whitespace");
-    if (code.Current !== this.#tag)
-      throw new Error("Element closing tag mismatch");
-
-    code.Continue("skip-whitespace");
-    if ((code.Current as string) !== ">") throw new Error("No tag close");
-    code.Continue("skip-whitespace");
+      code.Continue("skip-whitespace");
+      if ((code.Current as string) !== ">")
+        throw this.#error("No closing tag", {
+          tag: this.#tag,
+          attributes: this.#attributes,
+          symbol: code.Current,
+        });
+      code.Continue("skip-whitespace");
+    } else {
+      code.Continue("skip-whitespace");
+    }
   }
 
   get TagName() {

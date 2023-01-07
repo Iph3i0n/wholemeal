@@ -31,7 +31,7 @@ Deno.test("Creates a sheet with an if statement", () => {
       }
     }
   `).JavaScript,
-      { open: true }
+      { ctx: { open: true } }
     )(),
     [
       {

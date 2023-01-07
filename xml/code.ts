@@ -32,7 +32,7 @@ export default class Code {
   }
 
   get IsKeyword() {
-    return !!this.Current.match(Code.#key_worder)?.length;
+    return this.Current && !!this.Current.match(Code.#key_worder)?.length;
   }
 
   Continue(skip?: "skip-whitespace") {
@@ -41,6 +41,6 @@ export default class Code {
   }
 
   SkipWhitespace() {
-    while (this.Current && this.Current.match(/\s/gm)?.length) this.Continue();
+    while (this.Current && !this.Current.trim()) this.Continue();
   }
 }
