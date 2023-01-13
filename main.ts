@@ -9,7 +9,6 @@ Yargs(Deno.args)
     async (args: Yarguments) => {
       console.log("Starting the dev project");
       const project = new Project(args.proj || "./project.sd.json");
-      await project.CreateTypes(args.out || "./dist");
       await project.Compile(args.out || "./dist", false);
 
       console.log("Listening for changes in " + project.Cwd);
@@ -25,7 +24,6 @@ Yargs(Deno.args)
       const is_valid = (p: string) => should_like.some((l) => l(p));
       for await (const eve of Deno.watchFs(project.Cwd))
         if (eve.paths.some(is_valid)) {
-          await project.CreateTypes(args.out || "./dist");
           await project.Compile(args.out || "./dist", false);
         }
     }
@@ -37,8 +35,17 @@ Yargs(Deno.args)
     async (args: Yarguments) => {
       console.log("Building the project for production");
       const project = new Project(args.proj || "./project.sd.json");
-      await project.CreateTypes(args.out || "./dist");
       await project.Compile(args.out || "./dist", true);
+      Deno.exit(0);
+    }
+  )
+  .command(
+    "types",
+    "Build documentation for your project",
+    async (args: Yarguments) => {
+      console.log("Generating docs");
+      const project = new Project(args.proj || "./project.sd.json");
+      await project.CreateTypes(args.out || "./dist");
       Deno.exit(0);
     }
   )
