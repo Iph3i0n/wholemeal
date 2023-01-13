@@ -9,6 +9,7 @@ Yargs(Deno.args)
     async (args: Yarguments) => {
       console.log("Starting the dev project");
       const project = new Project(args.proj || "./project.sd.json");
+      await project.CreateTypes(args.out || "./dist");
       await project.Compile(args.out || "./dist", false);
 
       console.log("Listening for changes in " + project.Cwd);
@@ -18,13 +19,15 @@ Yargs(Deno.args)
         (p) => p.endsWith(".js") && !p.endsWith("bundle.min.js"),
         (p) => p.endsWith(".ts"),
         (p) => p.endsWith(".pss"),
-        (p) => p.endsWith(".json"),
+        (p) => p.endsWith(".json") && !p.endsWith("bakery.html-data.json"),
       ];
 
       const is_valid = (p: string) => should_like.some((l) => l(p));
       for await (const eve of Deno.watchFs(project.Cwd))
-        if (eve.paths.some(is_valid))
+        if (eve.paths.some(is_valid)) {
+          await project.CreateTypes(args.out || "./dist");
           await project.Compile(args.out || "./dist", false);
+        }
     }
   )
   .command(
@@ -34,6 +37,7 @@ Yargs(Deno.args)
     async (args: Yarguments) => {
       console.log("Building the project for production");
       const project = new Project(args.proj || "./project.sd.json");
+      await project.CreateTypes(args.out || "./dist");
       await project.Compile(args.out || "./dist", true);
       Deno.exit(0);
     }

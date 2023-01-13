@@ -113,6 +113,39 @@ export default class Element extends Node {
     );
   }
 
+  get RawAttribute() {
+    return this.#attributes;
+  }
+
+  get TopLevelText() {
+    let result = this.#children
+      .filter(((c) => c instanceof Text) as (c: Node) => c is Text)
+      .map((c: Text) => c.TextContent)
+      .join(" ")
+      .replaceAll(/\s/gm, " ")
+      .trim();
+
+    while (result.includes("  ")) result = result.replaceAll("  ", " ");
+
+    return result;
+  }
+
+  IncludesTag(tag: string) {
+    return !!this.#children.find((c) => c instanceof Element && c.#tag === tag);
+  }
+
+  FindChild(tag: string) {
+    return this.#children.find(
+      (c) => c instanceof Element && c.#tag === tag
+    ) as Element | undefined;
+  }
+
+  FindAllChildren(tag: string) {
+    return this.#children.filter(
+      (c) => c instanceof Element && c.#tag === tag
+    ) as Element[];
+  }
+
   get Handlers() {
     const array_data = [];
     for (const key in this.#attributes) {
@@ -137,6 +170,14 @@ export default class Element extends Node {
 
   get Children() {
     return this.#children.map((c) => c.JavaScript);
+  }
+
+  get IsMetaTag() {
+    return (
+      this.TagName === "script" ||
+      this.TagName === "style" ||
+      this.TagName === "meta"
+    );
   }
 
   get JavaScript() {

@@ -23,6 +23,31 @@ export class Project {
     console.log(`${this.#time}: ${message}`);
   }
 
+  async CreateTypes(out_dir: string) {
+    this.#log(`Preparing types for ${this.#path}`);
+    const project: Runner.Project = JSON.parse(
+      await Deno.readTextFile(this.#path)
+    );
+
+    const data = {
+      version: 1.1,
+      tags: await Promise.all(
+        project.templates.map(async (t) => {
+          const content = await Deno.readTextFile(Path.join(this.Cwd, t));
+          const component = new Component(content);
+          return component.VsCodeHtmlData;
+        })
+      ),
+      globalAttributes: [],
+      valueSets: project.docs.value_sets,
+    };
+
+    await Deno.writeTextFile(
+      Path.join(out_dir, "bakery.html-data.json"),
+      JSON.stringify(data, undefined, 2)
+    );
+  }
+
   async Compile(out_dir: string, minify?: boolean) {
     this.#log(`Compiling for ${this.#path}`);
 

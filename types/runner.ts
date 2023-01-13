@@ -15,5 +15,15 @@ export namespace Runner {
   export type Project = {
     templates: Array<string>;
     global_css: string;
+    docs: {
+      value_sets: Array<{
+        name: string;
+        values: Array<{
+          name: string;
+          description?: string;
+          references?: Array<{ name: string; url: string }>;
+        }>;
+      }>;
+    };
   };
 }

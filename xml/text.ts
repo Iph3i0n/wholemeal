@@ -22,4 +22,8 @@ export default class Text extends Node {
       new Js.String(this.#data.trim())
     );
   }
+
+  get TextContent() {
+    return this.#data;
+  }
 }

@@ -10,7 +10,7 @@ export default class ObjectWriter extends Base {
 
   toString(): string {
     const result = [];
-    for (const key in this.#data) result.push(`${key}:${this.#data[key]}`);
+    for (const key in this.#data) result.push(`"${key}":${this.#data[key]}`);
     return `{${result.join(",")}}`;
   }
 }

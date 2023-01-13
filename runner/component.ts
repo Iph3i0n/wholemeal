@@ -31,7 +31,6 @@ export function CreateComponent(
     props: Record<string, string>;
     form?: boolean;
     base: new () => HTMLElement;
-    extends?: string;
     aria: Record<string, string>;
   },
   comp: Runner.ComponentFunction
@@ -65,7 +64,7 @@ export function CreateComponent(
       // deno-lint-ignore no-explicit-any
       const internals: any = this.#internals;
       for (const key in schema.aria)
-        if (key === "Role") internals.role = schema.aria[key];
+        if (key === "role") internals.role = schema.aria[key];
         else internals[`aria${key}`] = schema.aria[key];
     }
 
@@ -118,5 +117,5 @@ export function CreateComponent(
     }
   }
 
-  customElements.define(schema.name, Main, { extends: schema.extends });
+  customElements.define(schema.name, Main);
 }

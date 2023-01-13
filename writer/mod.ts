@@ -16,3 +16,4 @@ export { default as Return } from "./return.ts";
 export { default as Spread } from "./spread.ts";
 export { default as String } from "./string.ts";
 export { default as Any } from "./base.ts";
+export { default as Import } from "./import.ts";
