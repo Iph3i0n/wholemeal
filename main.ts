@@ -36,7 +36,7 @@ Yargs(Deno.args)
       console.log("Building the project for production");
       const project = new Project(args.proj || "./project.sd.json");
       await project.Compile(args.out || "./dist", true);
-      await project.CreateTypes(args.out || "./dist", args.version || "0.0.1");
+      await project.CreateTypes(args.out || "./dist", args.ver);
       Deno.exit(0);
     }
   )
