@@ -18,12 +18,12 @@ declare module "preact/src/jsx" {
       ${this.Metadata.map(
         (m) => `
         ${m.JsDoc(8)}
-        "${m.Name}": HTMLAttributes<{
+        "${m.Name}": {
           ${m.Attr.map((p) => p.Typings)
             .concat(m.Props.map((p) => p.Typings))
             .concat(m.Events.map((p) => p.Typings)).join(`;
           `)}
-        } & HTMLElement>`
+        } & HTMLAttributes<HTMLElement>`
       ).join(`;
       `)};
     }

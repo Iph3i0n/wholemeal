@@ -48,9 +48,9 @@ export default class Prop extends MetadataItem {
   }
 
   get Typings() {
-    return `"${this.Name}"${this.Optional || this.Default ? "?" : ""}: ${
-      this.Type || "string"
-    }`;
+    return `"${this.Name}"${
+      this.Optional || this.Default || this.Type === "boolean" ? "?" : ""
+    }: ${this.Type || "string"}`;
   }
 
   get JsDoc() {
