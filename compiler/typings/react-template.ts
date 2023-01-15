@@ -35,21 +35,25 @@ export function ${m.FunctionName}(props: {
     .concat(m.Props.map((p) => p.Typings))
     .concat(m.Events.map((p) => p.Typings)).join(`;
   `)}
+  ref?: React.RefObject<HTMLElement>
 }) {
-  return React.createElement("${m.Name}", {
-    ...props,
-    ref: (ref: any) => {
-      ${m.Props.map(
-        (p) => `if (props["${p.Name}"]) ref["${p.Name}"] = props["${p.Name}"]`
-      ).concat(
-        m.Events.map(
-          (p) =>
-            `if (props["${p.HandlerName}"]) ref.addEventListener("${p.Name}", props["${p.HandlerName}"])`
-        )
-      ).join(`;
-      `)}
-    }
-  });
+  const ref = props.ref || React.createRef();
+
+  React.useEffect(() => {
+    const r = ref.current;
+    if (!r) return;
+    ${m.Props.map(
+      (p) => `if (props["${p.Name}"]) r["${p.Name}"] = props["${p.Name}"]`
+    ).concat(
+      m.Events.map(
+        (p) =>
+          `if (props["${p.HandlerName}"]) r.addEventListener("${p.Name}", props["${p.HandlerName}"])`
+      )
+    ).join(`;
+    `)}
+  }, [ref]);
+
+  return React.createElement("${m.Name}", { ...props, ref });
 }`
 ).join(`
 
