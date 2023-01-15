@@ -39,7 +39,8 @@ export default abstract class TypingsTemplate {
   }`
       ).join(`
   `)
-    )}`;
+    ).join(`
+    `)}`;
   }
 
   get Metadata() {
