@@ -40,7 +40,7 @@ export function ${m.FunctionName}(props: {
   const ref = props.ref || React.createRef();
 
   React.useEffect(() => {
-    const r = ref.current;
+    const r: any = ref.current;
     if (!r) return;
     ${m.Props.map(
       (p) => `if (props["${p.Name}"]) r["${p.Name}"] = props["${p.Name}"]`

@@ -20,7 +20,12 @@ export default class Event extends MetadataItem {
   }
 
   get HandlerName() {
-    return "on" + this.Name[0].toUpperCase() + this.Name.substring(1);
+    return (
+      "on" +
+      this.Name.replace(/(^\w|-\w)/g, (item) =>
+        item.replace(/-/, "").toUpperCase()
+      )
+    );
   }
 
   get Keys() {
