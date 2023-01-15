@@ -5,3 +5,4 @@ export type { Arguments as Yarguments } from "https://deno.land/x/yargs@v17.6.2-
 export { YargsInstance } from "https://deno.land/x/yargs@v17.6.2-deno/build/lib/yargs-factory.js";
 export * as EsBuild from "https://deno.land/x/esbuild@v0.15.10/mod.js";
 export * as DenoLoader from "https://deno.land/x/esbuild_deno_loader@0.6.0/mod.ts";
+export * as CustomManifest from "https://raw.githubusercontent.com/webcomponents/custom-elements-manifest/main/schema.d.ts";

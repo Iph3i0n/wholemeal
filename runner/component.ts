@@ -27,7 +27,6 @@ function PropValue(value: string): any {
 
 export function CreateComponent(
   schema: {
-    name: string;
     props: Record<string, string>;
     form?: boolean;
     base: new () => HTMLElement;
@@ -36,7 +35,7 @@ export function CreateComponent(
   comp: Runner.ComponentFunction
 ) {
   const Base = schema.base;
-  class Main extends Base implements Runner.IComponent {
+  return class extends Base implements Runner.IComponent {
     public static formAssociated = !!schema.form;
 
     readonly #root: ShadowRoot;
@@ -115,7 +114,5 @@ export function CreateComponent(
     get root() {
       return this.#root;
     }
-  }
-
-  customElements.define(schema.name, Main);
+  };
 }

@@ -1,7 +1,10 @@
-import { Path, DenoLoader, EsBuild } from "../deps.ts";
+import { Path, DenoLoader, EsBuild, CustomManifest } from "../deps.ts";
 import Sheet from "../pss/sheet.ts";
 import { Runner } from "../types/runner.ts";
 import Component from "../xml/component.ts";
+import { OutputTextFile } from "./fs.ts";
+import ReactTypingsTemplate from "./typings/react-template.ts";
+import PreactTypingsTemplate from "./typings/preact-template.ts";
 import Template from "./template.ts";
 
 export class Project {
@@ -23,28 +26,86 @@ export class Project {
     console.log(`${this.#time}: ${message}`);
   }
 
-  async CreateTypes(out_dir: string) {
+  get #project() {
+    return Deno.readTextFile(this.#path).then(
+      (text) => JSON.parse(text) as Runner.Project
+    );
+  }
+
+  async CreateTypes(out_dir: string, version: string) {
     this.#log(`Preparing types for ${this.#path}`);
-    const project: Runner.Project = JSON.parse(
-      await Deno.readTextFile(this.#path)
+    const project = await this.#project;
+
+    const components = await Promise.all(
+      project.templates.map(async (t) => {
+        const content = await Deno.readTextFile(Path.join(this.Cwd, t));
+        return new Component(content).Metadata;
+      })
     );
 
-    const data = {
+    const vs_code_data = {
       version: 1.1,
-      tags: await Promise.all(
-        project.templates.map(async (t) => {
-          const content = await Deno.readTextFile(Path.join(this.Cwd, t));
-          const component = new Component(content);
-          return component.VsCodeHtmlData;
-        })
-      ),
+      tags: components.map((c) => c.VsCodeHtmlData),
       globalAttributes: [],
-      valueSets: project.docs.value_sets,
+      valueSets: [
+        ...project.docs.value_sets,
+        {
+          name: "boolean",
+          values: [
+            {
+              name: "",
+              description: "true",
+            },
+          ],
+        },
+      ],
     };
 
-    await Deno.writeTextFile(
+    await OutputTextFile(
       Path.join(out_dir, "bakery.html-data.json"),
-      JSON.stringify(data, undefined, 2)
+      JSON.stringify(vs_code_data, undefined, 2)
+    );
+
+    const package_data: CustomManifest.Package = {
+      schemaVersion: "1.0.0",
+      modules: [
+        {
+          kind: "javascript-module",
+          path: "bundle.min.js",
+          description: project.description,
+          declarations: components.map((c) => c.Declaration),
+        },
+      ],
+    };
+
+    await OutputTextFile(
+      Path.join(out_dir, "custom-elements.json"),
+      JSON.stringify(package_data, undefined, 2)
+    );
+
+    await Deno.writeTextFile(
+      Path.join(out_dir, "package.json"),
+      JSON.stringify(
+        {
+          ...project.package,
+          customElements: "./custom-elements.json",
+          main: "bundle.min.js",
+          version,
+          description: project.description,
+        },
+        undefined,
+        2
+      )
+    );
+
+    await OutputTextFile(
+      Path.join(out_dir, "typescript", "react.ts"),
+      new ReactTypingsTemplate(components, project.docs).Script
+    );
+
+    await OutputTextFile(
+      Path.join(out_dir, "typescript", "preact.ts"),
+      new PreactTypingsTemplate(components, project.docs).Script
     );
   }
 
@@ -52,8 +113,7 @@ export class Project {
     this.#log(`Compiling for ${this.#path}`);
 
     try {
-      const data = await Deno.readTextFile(this.#path);
-      const project: Runner.Project = JSON.parse(data);
+      const project = await this.#project;
 
       const result = await EsBuild.build({
         stdin: {

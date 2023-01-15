@@ -36,6 +36,7 @@ Yargs(Deno.args)
       console.log("Building the project for production");
       const project = new Project(args.proj || "./project.sd.json");
       await project.Compile(args.out || "./dist", true);
+      await project.CreateTypes(args.out || "./dist", args.version || "0.0.1");
       Deno.exit(0);
     }
   )
@@ -45,7 +46,7 @@ Yargs(Deno.args)
     async (args: Yarguments) => {
       console.log("Generating docs");
       const project = new Project(args.proj || "./project.sd.json");
-      await project.CreateTypes(args.out || "./dist");
+      await project.CreateTypes(args.out || "./dist", args.version || "0.0.1");
       Deno.exit(0);
     }
   )

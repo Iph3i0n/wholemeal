@@ -20,7 +20,7 @@ export default class Template {
         CreateRef,
         BeforeRenderEvent
       } from "${import.meta.resolve("../mod.ts")}";
-      ${this.#data.ScriptImports};
+      ${this.#data.Metadata.ScriptImports};
   
       async function Component() {
         const self = this;
@@ -36,10 +36,14 @@ export default class Template {
         };
       };
   
-      CreateComponent(
-        ${this.#data.ScriptMeta},
+      window.${this.#data.Metadata.FunctionName} = CreateComponent(
+        ${this.#data.Metadata.SchemaBlock},
         Component
       );
+
+      customElements.define("${this.#data.Metadata.Name}", window.${
+      this.#data.Metadata.FunctionName
+    });
     `;
   }
 }
