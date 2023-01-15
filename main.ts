@@ -40,16 +40,6 @@ Yargs(Deno.args)
       Deno.exit(0);
     }
   )
-  .command(
-    "types",
-    "Build documentation for your project",
-    async (args: Yarguments) => {
-      console.log("Generating docs");
-      const project = new Project(args.proj || "./project.sd.json");
-      await project.CreateTypes(args.out || "./dist", args.version || "0.0.1");
-      Deno.exit(0);
-    }
-  )
   .strictCommands()
   .demandCommand(1)
   .parse();
