@@ -94,6 +94,7 @@ export default class Metadata extends MetadataItem {
       superclass: {
         name: this.Base?.Name ?? "HTMLElement",
       },
+      description: this.Description.Text,
       customElement: true,
       events: this.Events.map((e) => ({
         name: e.Name,
