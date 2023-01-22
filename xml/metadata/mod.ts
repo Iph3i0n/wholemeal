@@ -6,6 +6,7 @@ import Prop from "./prop.ts";
 import Slot from "./slot.ts";
 import * as Js from "../../writer/mod.ts";
 import { CustomManifest } from "../../deps.ts";
+import ToPascal from "./to-pascal.ts";
 
 export default class Metadata extends MetadataItem {
   get Name() {
@@ -13,9 +14,7 @@ export default class Metadata extends MetadataItem {
   }
 
   get FunctionName() {
-    return this.Name.replace(/(^\w|-\w)/g, (item) =>
-      item.replace(/-/, "").toUpperCase()
-    );
+    return ToPascal(this.Name);
   }
 
   get Summary() {
@@ -53,36 +52,13 @@ export default class Metadata extends MetadataItem {
     return this.Data.FindAllChildren("attr").map((s) => new Prop(s));
   }
 
-  get Props() {
-    return this.Data.FindAllChildren("prop").map((s) => new Prop(s));
-  }
-
   get Slots() {
     return this.Data.FindAllChildren("slot").map((s) => new Slot(s));
   }
 
   get SchemaBlock() {
     return new Js.Object({
-      props: new Js.Object(
-        this.Attr.reduce(
-          (c, n) => ({
-            ...c,
-            [n.Name]: n.JavaScript,
-          }),
-          {} as Record<string, Js.Any>
-        )
-      ),
       form: new Js.Boolean(!!this.Form),
-      base: new Js.Reference(this.Base?.Name ?? "HTMLElement"),
-      aria: new Js.Object(
-        Object.keys(this.Aria).reduce(
-          (c, k) => ({
-            ...c,
-            [k]: new Js.String(this.Aria[k].toString()),
-          }),
-          {} as Record<string, Js.Any>
-        )
-      ),
     });
   }
 
@@ -109,7 +85,7 @@ export default class Metadata extends MetadataItem {
           text: a.Type || "string",
         },
       })),
-      members: this.Props.map((p) => ({
+      members: this.Attr.map((p) => ({
         kind: "field",
         name: p.Name,
         description: p.Description.Text,
@@ -160,7 +136,6 @@ export default class Metadata extends MetadataItem {
   JsDoc(level: number) {
     const main_line = [
       this.Description.Text,
-      ...this.Props.map((p) => p.JsDoc),
       ...this.Attr.map((p) => p.JsDoc),
       ...this.Events.map((p) => p.JsDoc),
       ...this.Slots.map((p) => p.JsDoc),

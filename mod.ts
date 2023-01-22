@@ -1,4 +1,3 @@
-import { Runner } from "./types/runner.ts";
 export {
   LoadedEvent,
   RenderEvent,
@@ -7,7 +6,7 @@ export {
   BeforeRenderEvent,
 } from "./runner/events.ts";
 
-export type IComponent = Runner.IComponent;
+export { ComponentBase } from "./runner/component.ts";
 
 export function CreateRef<T extends HTMLElement>(): { current?: T } {
   return { current: undefined };

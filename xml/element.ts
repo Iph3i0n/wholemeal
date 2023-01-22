@@ -176,7 +176,7 @@ export default class Element extends Node {
     return (
       this.TagName === "script" ||
       this.TagName === "style" ||
-      this.TagName === "meta"
+      this.TagName === "s:meta"
     );
   }
 

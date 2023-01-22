@@ -1,14 +1,23 @@
 import MetadataItem from "./base.ts";
 import * as Js from "../../writer/mod.ts";
 import Description from "./description.ts";
+import ToPascal from "./to-pascal.ts";
 
 export default class Prop extends MetadataItem {
   get Name() {
     return this.Data.RawAttribute.name.toString();
   }
 
+  get JsName() {
+    return ToPascal(this.Name);
+  }
+
   get Type() {
     return this.Data.RawAttribute.type?.toString();
+  }
+
+  get Property() {
+    return "property" in this.Data.RawAttribute;
   }
 
   get Default() {
@@ -21,14 +30,6 @@ export default class Prop extends MetadataItem {
 
   get Description() {
     return new Description(this.Data);
-  }
-
-  get JavaScript() {
-    return this.Type === "boolean"
-      ? new Js.Boolean(false)
-      : this.Default
-      ? new Js.String(this.Default)
-      : new Js.Reference("undefined");
   }
 
   get VsCodeHtmlData() {

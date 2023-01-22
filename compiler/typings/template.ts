@@ -5,10 +5,7 @@ export default abstract class TypingsTemplate {
   readonly #metadata: Array<Metadata>;
   readonly #extra_types: Runner.Project["docs"];
 
-  constructor(
-    metadata: Array<Metadata>,
-    extra_types: Runner.Project["docs"]
-  ) {
+  constructor(metadata: Array<Metadata>, extra_types: Runner.Project["docs"]) {
     this.#metadata = metadata;
     this.#extra_types = extra_types;
   }
@@ -29,18 +26,30 @@ export default abstract class TypingsTemplate {
 
   get GlobalDeclarations() {
     return `
-  ${this.#metadata
-    .filter((m) => m.Events.length)
-    .map((m) =>
-      m.Events.map(
-        (e) => `class ${e.Type} {
-    ${e.Keys.map((k) => `readonly ${k.Name}: ${k.Type}`).join(`;
-    `)};
-  }`
-      ).join(`
-  `)
+${this.#metadata
+  .map(
+    (m) => `declare class ${m.FunctionName}Element extends HTMLElement {
+  ${m.Attr.map((a) => `"${a.Name}": ${a.Type ?? "string"};`).join(`
+  `)}
+}`
+  )
+  .join("\n")}
+
+${this.#metadata
+  .filter((m) => m.Events.length)
+  .map((m) =>
+    m.Events.map(
+      (e) => `declare class ${e.Type} extends Event {
+  readonly currentTarget: ${m.FunctionName}Element;
+  ${e.Keys.map((k) => `readonly ${k.Name}: ${k.Type}`).join(`;
+  `)};
+}`
     ).join(`
-    `)}`;
+`)
+  )
+  .join("\n")}
+  
+`;
   }
 
   get Metadata() {

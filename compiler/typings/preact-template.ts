@@ -6,9 +6,8 @@ export default class PreactTypingsTemplate extends TypingsTemplate {
 
 ${this.ExtraDeclarations}
 
-declare global {
-  ${this.GlobalDeclarations}
-}
+
+${this.GlobalDeclarations}
 
 declare module "preact/src/jsx" {
   namespace JSXInternal {
@@ -19,9 +18,8 @@ declare module "preact/src/jsx" {
         (m) => `
         ${m.JsDoc(8)}
         "${m.Name}": {
-          ${m.Attr.map((p) => p.Typings)
-            .concat(m.Props.map((p) => p.Typings))
-            .concat(m.Events.map((p) => p.Typings)).join(`;
+          ${m.Attr.map((p) => p.Typings).concat(m.Events.map((p) => p.Typings))
+            .join(`;
           `)}
         } & HTMLAttributes<HTMLElement>`
       ).join(`;

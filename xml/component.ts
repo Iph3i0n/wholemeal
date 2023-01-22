@@ -67,7 +67,7 @@ export default class Component {
   }
 
   get Metadata() {
-    const tag = this.#find_tag("meta");
+    const tag = this.#find_tag("s:meta");
     if (!tag || !tag.RawAttribute.name)
       throw new Error("Components must have a meta tag with a name attribute");
 
