@@ -16,7 +16,7 @@ export default class Event extends MetadataItem {
   }
 
   get Typings() {
-    return `${this.HandlerName}: (event: ${this.Type}) => void`;
+    return `${this.HandlerName}?: (event: ${this.Type}) => void`;
   }
 
   get HandlerName() {
