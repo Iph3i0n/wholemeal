@@ -183,11 +183,20 @@ export default class Element extends Node {
   get JavaScript() {
     switch (this.#tag) {
       case "s:if":
-        return new Js.If(
+        return new Js.IfElse(
           new Js.Reference(
             this.#attributes.check.toString()?.replace(":", "") ?? ""
           ),
-          new Js.Block(...this.Children)
+          new Js.Block(...this.Children),
+          new Js.Block(
+            ...this.Children.map(
+              () =>
+                new Js.Call(
+                  new Js.Access("push", new Js.Reference("result")),
+                  new Js.Reference("null")
+                )
+            )
+          )
         );
       case "s:for":
         return new Js.For(

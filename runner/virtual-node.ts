@@ -17,9 +17,29 @@ abstract class VirtualNode<TNode extends Ast.Html.Node> {
 }
 
 const create_input = (proposed: Ast.Html.Node) =>
-  typeof proposed === "string"
+  proposed == null
+    ? new EmptyNode(proposed)
+    : typeof proposed === "string"
     ? new VirtualText(proposed)
     : new VirtualElement(proposed);
+
+class EmptyNode extends VirtualNode<null> {
+  readonly #node = document.createComment("Empty Node");
+
+  CanMerge(_: Ast.Html.Node): boolean {
+    return false;
+  }
+
+  Merge(_: Ast.Html.Node): void {
+    throw new Error("Method not implemented.");
+  }
+
+  get Node(): Node {
+    return this.#node;
+  }
+
+  Delete(): void {}
+}
 
 class VirtualElement extends VirtualNode<Ast.Html.Element> {
   #element: HTMLElement;
@@ -48,13 +68,13 @@ class VirtualElement extends VirtualNode<Ast.Html.Element> {
   }
 
   override CanMerge(node: Ast.Html.Node): boolean {
-    if (typeof node === "string") return false;
+    if (!node || typeof node === "string") return false;
 
     return this.node.tag === node.tag;
   }
 
   override Merge(next: Ast.Html.Node): void {
-    if (typeof next === "string" || next.tag !== this.node.tag)
+    if (!next || typeof next === "string" || next.tag !== this.node.tag)
       throw new Error("Attempt to merge an invalid node");
 
     for (const key in next.attr) {

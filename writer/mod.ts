@@ -17,3 +17,4 @@ export { default as Spread } from "./spread.ts";
 export { default as String } from "./string.ts";
 export { default as Any } from "./base.ts";
 export { default as Import } from "./import.ts";
+export { default as IfElse } from "./if-else.ts";

@@ -13,9 +13,7 @@ export namespace Ast {
 
     export type Text = string;
 
-    export type Raw = { raw: string, data: string };
-
-    export type Node = Element | Text | Raw;
+    export type Node = Element | Text | null;
 
     export type Dom = Array<Node>;
   }
