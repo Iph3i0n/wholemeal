@@ -48,6 +48,10 @@ export default class Metadata extends MetadataItem {
     return base ? new Import(base) : undefined;
   }
 
+  get Members() {
+    return this.Data.FindAllChildren("member").map((s) => new Prop(s));
+  }
+
   get Attr() {
     return this.Data.FindAllChildren("attr").map((s) => new Prop(s));
   }
@@ -85,15 +89,26 @@ export default class Metadata extends MetadataItem {
           text: a.Type || "string",
         },
       })),
-      members: this.Attr.map((p) => ({
-        kind: "field",
-        name: p.Name,
-        description: p.Description.Text,
-        default: p.Default,
-        type: {
-          text: p.Type || "string",
-        },
-      })),
+      members: [
+        ...this.Attr.map((p) => ({
+          kind: "field" as const,
+          name: p.Name,
+          description: p.Description.Text,
+          default: p.Default,
+          type: {
+            text: p.Type || "string",
+          },
+        })),
+        ...this.Members.map((p) => ({
+          kind: "field" as const,
+          name: p.Name,
+          description: p.Description.Text,
+          default: p.Default,
+          type: {
+            text: p.Type || "string",
+          },
+        })),
+      ],
       slots: this.Slots.map((s) => ({
         name: s.Name,
         description: s.Description.Text,

@@ -28,6 +28,10 @@ export default class Prop extends MetadataItem {
     return !!this.Data.RawAttribute.optional;
   }
 
+  get Readonly() {
+    return !!this.Data.RawAttribute.readonly;
+  }
+
   get Description() {
     return new Description(this.Data);
   }

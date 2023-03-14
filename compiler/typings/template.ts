@@ -29,7 +29,15 @@ export default abstract class TypingsTemplate {
 ${this.#metadata
   .map(
     (m) => `declare class ${m.FunctionName}Element extends HTMLElement {
-  ${m.Attr.map((a) => `"${a.Name}": ${a.Type ?? "string"};`).join(`
+  ${m.Attr.map(
+    (a) => `/** ${a.Description.Text} */
+    "${a.Name}": ${a.Type ?? "string"};`
+  ).join(`
+  `)}
+  ${m.Members.map(
+    (a) => `/** ${a.Description.Text} */
+    ${a.Readonly ? "readonly " : ""}"${a.Name}": ${a.Type ?? "string"};`
+  ).join(`
   `)}
 }`
   )
