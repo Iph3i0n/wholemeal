@@ -49,7 +49,18 @@ class VirtualElement extends VirtualNode<Ast.Html.Element> {
 
     const result = document.createElement(node.tag);
     for (const key in node.attr)
-      if (node.attr[key] != null) result.setAttribute(key, node.attr[key]);
+      if (node.attr[key] != null)
+        if (
+          typeof node.attr[key] === "string" ||
+          typeof node.attr[key] === "boolean"
+        )
+          result.setAttribute(key, node.attr[key]);
+        // deno-lint-ignore no-explicit-any
+        else if (key in result) (result as any)[key] = node.attr[key];
+        else
+          console.warn(
+            `Attribute ${key} is not a string or boolean type and has no setter so the value is being ignored.`
+          );
 
     const manager = new EventManager(result);
     for (const key in node.handlers) manager.Add(key, node.handlers[key]);
