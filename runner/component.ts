@@ -23,6 +23,8 @@ function PropValue(value: string): any {
     : value;
 }
 
+type Handler<T extends Event> = (event: Event) => void;
+
 export abstract class ComponentBase extends HTMLElement {
   readonly #root: ShadowRoot;
   readonly #internals: ElementInternals;
@@ -66,7 +68,18 @@ export abstract class ComponentBase extends HTMLElement {
     this.#css = css;
 
     this.#render();
-    this.addEventListener(ShouldRender.Key, () => this.#render());
+
+    const on_render = (() => {
+      let timeout = 0;
+      return () => {
+        if (timeout) clearTimeout(timeout);
+
+        timeout = setTimeout(() => {
+          this.#render();
+        }, 5);
+      };
+    })();
+    this.addEventListener(ShouldRender.Key, on_render);
     this.dispatchEvent(new LoadedEvent());
   }
 
@@ -90,5 +103,35 @@ export abstract class ComponentBase extends HTMLElement {
 
   get root() {
     return this.#root;
+  }
+
+  set before_render(handler: Handler<BeforeRenderEvent>) {
+    this.addEventListener(BeforeRenderEvent.Key, handler);
+  }
+
+  set after_render(handler: Handler<RenderEvent>) {
+    this.addEventListener(RenderEvent.Key, handler);
+  }
+
+  set after_load(handler: Handler<LoadedEvent>) {
+    this.addEventListener(LoadedEvent.Key, handler);
+  }
+
+  set after_props(handler: Handler<PropsEvent>) {
+    this.addEventListener(PropsEvent.Key, handler);
+  }
+
+  handler_for(name: string) {
+    // deno-lint-ignore no-this-alias
+    const self = this;
+    return {
+      set handler(handler: Handler<Event>) {
+        self.addEventListener(name, handler);
+      },
+    };
+  }
+
+  should_render() {
+    this.dispatchEvent(new ShouldRender());
   }
 }

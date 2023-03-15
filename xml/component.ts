@@ -6,6 +6,37 @@ import Sheet from "../pss/sheet.ts";
 import * as Js from "../writer/mod.ts";
 import Metadata from "./metadata/mod.ts";
 
+const IsImport =
+  /import([ \n\t]*(?:[^ \n\t\{\}]+[ \n\t]*,?)?(?:[ \n\t]*\{(?:[ \n\t]*[^ \n\t"'\{\}]+[ \n\t]*,?)+\})?[ \n\t]*)from[ \n\t]*(['"])([^'"\n]+)(?:['"])/gm;
+
+const Blocks: Array<(s: string) => string> = [
+  (s) =>
+    s.replaceAll(
+      /([^,{\s(=])\s*\$before:\s*{/gm,
+      `$1;\nself.before_render = (event) => {`
+    ),
+  (s) =>
+    s.replaceAll(
+      /([^,{\s(=])\s*\$after:\s*{/gm,
+      `$1;\nself.after_render = (event) => {`
+    ),
+  (s) =>
+    s.replaceAll(
+      /([^,{\s(=])\s*\$load:\s*{/gm,
+      `$1;\nself.after_load = (event) => {`
+    ),
+  (s) =>
+    s.replaceAll(
+      /([^,{\s(=])\s*\$props:\s*{/gm,
+      `$1;\nself.after_props = (event) => {`
+    ),
+  (s) =>
+    s.replaceAll(
+      /([^,{\s(=])\s*\$on_([a-zA-Z0-9_]+):\s*{/gm,
+      `$1;\nself.handler_for("$2").handler = (event) => {`
+    ),
+];
+
 export default class Component {
   readonly #children: Array<Node> = [];
 
@@ -28,18 +59,19 @@ export default class Component {
   get #script_content() {
     const result = this.#find_tag("script");
     if (!result) return "";
-    return result.TextContent;
+    let text = result.TextContent;
+    for (const block of Blocks) text = block(text);
+    return text;
   }
 
   get ScriptMain() {
-    return this.#script_content
-      .split(";")
-      .filter(
-        (t) =>
-          !(t.trim().startsWith("import") || t.trim().startsWith("export "))
-      )
-      .join(";")
-      .trim();
+    return this.#script_content.replaceAll(IsImport, "").trim();
+  }
+
+  get ScriptImports() {
+    return [...(this.#script_content.match(IsImport) ?? [])]
+      .map((s) => s)
+      .join(";");
   }
 
   get Css() {

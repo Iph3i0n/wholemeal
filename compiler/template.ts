@@ -28,6 +28,7 @@ import {
   BeforeRenderEvent
 } from "${import.meta.resolve("../mod.ts")}";
 ${this.#data.Metadata.ScriptImports};
+${this.#data.ScriptImports}
 
 export class ${function_name} extends ${base} {
   get aria() {
