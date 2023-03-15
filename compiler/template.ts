@@ -71,8 +71,8 @@ export class ${function_name} extends ${base} {
 
   async start() {
     const self = this;
-    const handle = (handler) => (e) => {
-      handler(e);
+    const handle = (handler) => async (e) => {
+      await handler(e);
       this.dispatchEvent(new ShouldRender());
     };
   
