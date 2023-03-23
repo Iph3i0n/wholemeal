@@ -1,3 +1,4 @@
+import Element from "../element.ts";
 import MetadataItem from "./base.ts";
 import Description from "./description.ts";
 import Event from "./event.ts";
@@ -9,7 +10,18 @@ import { CustomManifest } from "../../deps.ts";
 import ToPascal from "./to-pascal.ts";
 
 export default class Metadata extends MetadataItem {
+  readonly #namespace: string;
+
+  constructor(data: Element, namespace: string) {
+    super(data);
+    this.#namespace = namespace;
+  }
+
   get Name() {
+    return this.#namespace + this.Data.RawAttribute.name.toString();
+  }
+
+  get BaseName() {
     return this.Data.RawAttribute.name.toString();
   }
 

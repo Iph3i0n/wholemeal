@@ -27,5 +27,6 @@ export namespace Runner {
       }>;
     };
     package: Record<string, unknown>;
+    namespace?: string;
   };
 }

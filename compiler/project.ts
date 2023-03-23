@@ -9,9 +9,11 @@ import Template from "./template.ts";
 
 export class Project {
   readonly #path: string;
+  readonly #overrides: Partial<Runner.Project> | undefined;
 
-  constructor(path: string) {
+  constructor(path: string, overrides: Partial<Runner.Project> | undefined) {
     this.#path = Path.resolve(path);
+    this.#overrides = overrides;
   }
 
   get Cwd() {
@@ -27,9 +29,9 @@ export class Project {
   }
 
   get #project() {
-    return Deno.readTextFile(this.#path).then(
-      (text) => JSON.parse(text) as Runner.Project
-    );
+    return Deno.readTextFile(this.#path)
+      .then((text) => JSON.parse(text) as Runner.Project)
+      .then((p) => ({ ...p, ...this.#overrides }));
   }
 
   async CreateTypes(out_dir: string, version: string) {
@@ -39,7 +41,7 @@ export class Project {
     const components = await Promise.all(
       project.templates.map(async (t) => {
         const content = await Deno.readTextFile(Path.join(this.Cwd, t));
-        return new Component(content).Metadata;
+        return new Component(content, project.namespace ?? "").Metadata;
       })
     );
 
@@ -150,7 +152,9 @@ export class Project {
 
               build.onLoad({ filter: /\.std$/ }, async (args) => {
                 const data = await Deno.readTextFile(args.path);
-                const result = new Template(new Component(data)).JavaScript;
+                const result = new Template(
+                  new Component(data, project.namespace ?? "")
+                ).JavaScript;
                 return {
                   contents: result,
                   loader: "js",
