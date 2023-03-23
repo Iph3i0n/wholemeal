@@ -13,27 +13,27 @@ const Blocks: Array<(s: string) => string> = [
   (s) =>
     s.replaceAll(
       /([^,{\s(=])\s*\$before:\s*{/gm,
-      `$1;\nself.before_render = (event) => {`
+      `$1;\nself.before_render = async (event) => {`
     ),
   (s) =>
     s.replaceAll(
       /([^,{\s(=])\s*\$after:\s*{/gm,
-      `$1;\nself.after_render = (event) => {`
+      `$1;\nself.after_render = async (event) => {`
     ),
   (s) =>
     s.replaceAll(
       /([^,{\s(=])\s*\$load:\s*{/gm,
-      `$1;\nself.after_load = (event) => {`
+      `$1;\nself.after_load = async (event) => {`
     ),
   (s) =>
     s.replaceAll(
       /([^,{\s(=])\s*\$props:\s*{/gm,
-      `$1;\nself.after_props = (event) => {`
+      `$1;\nself.after_props = async (event) => {`
     ),
   (s) =>
     s.replaceAll(
       /([^,{\s(=])\s*\$on_([a-zA-Z0-9_]+):\s*{/gm,
-      `$1;\nself.handler_for("$2").handler = (event) => {`
+      `$1;\nself.handler_for("$2").handler = async (event) => {`
     ),
 ];
 
