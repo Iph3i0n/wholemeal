@@ -18,7 +18,8 @@ export default class Metadata extends MetadataItem {
   }
 
   get Name() {
-    return this.#namespace + this.Data.RawAttribute.name.toString();
+    if (this.#namespace) return this.#namespace + "-" + this.BaseName;
+    return this.BaseName;
   }
 
   get BaseName() {
