@@ -5,6 +5,7 @@ import Element from "./element.ts";
 import Sheet from "../pss/sheet.ts";
 import * as Js from "../writer/mod.ts";
 import Metadata from "./metadata/mod.ts";
+import { Project } from "../compiler/project.ts";
 
 const IsImport =
   /import([ \n\t]*(?:[^ \n\t\{\}]+[ \n\t]*,?)?(?:[ \n\t]*\{(?:[ \n\t]*[^ \n\t"'\{\}]+[ \n\t]*,?)+\})?[ \n\t]*)from[ \n\t]*(['"])([^'"\n]+)(?:['"])/gm;
@@ -39,16 +40,16 @@ const Blocks: Array<(s: string) => string> = [
 
 export default class Component {
   readonly #children: Array<Node> = [];
-  readonly #namespace: string;
+  readonly #project: Project;
 
-  constructor(code: string, namespace: string) {
+  constructor(code: string, project: Project) {
     const code_object = new Code(code);
     while (!code_object.Done)
       if (code_object.Current === "<")
-        this.#children.push(new Element(code_object));
+        this.#children.push(new Element(code_object, project));
       else this.#children.push(new Text(code_object));
 
-    this.#namespace = namespace;
+    this.#project = project;
   }
 
   #find_tag(name: string) {
@@ -106,6 +107,6 @@ export default class Component {
     if (!tag || !tag.RawAttribute.name)
       throw new Error("Components must have a meta tag with a name attribute");
 
-    return new Metadata(tag, this.#namespace);
+    return new Metadata(tag, this.#project);
   }
 }

@@ -8,18 +8,18 @@ import Slot from "./slot.ts";
 import * as Js from "../../writer/mod.ts";
 import { CustomManifest } from "../../deps.ts";
 import ToPascal from "./to-pascal.ts";
+import { Project } from "../../compiler/project.ts";
 
 export default class Metadata extends MetadataItem {
-  readonly #namespace: string;
+  readonly #project: Project;
 
-  constructor(data: Element, namespace: string) {
+  constructor(data: Element, project: Project) {
     super(data);
-    this.#namespace = namespace;
+    this.#project = project;
   }
 
   get Name() {
-    if (this.#namespace) return this.#namespace + "-" + this.BaseName;
-    return this.BaseName;
+    return this.#project.GetTagName(this.BaseName);
   }
 
   get BaseName() {

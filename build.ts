@@ -1,4 +1,4 @@
-import { Project } from "./compiler/project.ts";
+import Compiler from "./compiler/compiler.ts";
 import { Runner } from "./types/runner.ts";
 
 export default async function Build(
@@ -10,7 +10,7 @@ export default async function Build(
   overrides?: Partial<Runner.Project>
 ) {
   console.log("Building the project for production");
-  const project = new Project(args.proj || "./project.sd.json", overrides);
+  const project = new Compiler(args.proj || "./project.sd.json", overrides);
   await project.Compile(args.out || "./dist", true);
   await project.CreateTypes(args.out || "./dist", args.ver);
 }

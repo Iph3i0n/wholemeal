@@ -2,6 +2,7 @@ import * as Js from "../writer/mod.ts";
 import Code from "./code.ts";
 import Node from "./node.ts";
 import Text from "./text.ts";
+import { Project } from "../compiler/project.ts";
 
 const AllText = ["script", "style"];
 
@@ -10,13 +11,15 @@ export default class Element extends Node {
   readonly #attributes: Record<string, string | boolean> = {};
   readonly #children: Array<Node> = [];
   readonly #text_content: string = "";
+  readonly #project: Project;
 
   #error(message: string, context: unknown) {
     return new Error(`${message}\n${JSON.stringify(context, undefined, 2)}`);
   }
 
-  constructor(code: Code) {
+  constructor(code: Code, project: Project) {
     super();
+    this.#project = project;
     if (code.Current !== "<")
       throw this.#error("Elements must start with a <", {});
     code.Continue("skip-whitespace");
@@ -54,7 +57,8 @@ export default class Element extends Node {
         if (AllText.includes(this.#tag)) {
           this.#text_content += code.Current;
           code.Continue();
-        } else if (code.Current === "<") this.#children.push(new Element(code));
+        } else if (code.Current === "<")
+          this.#children.push(new Element(code, project));
         else this.#children.push(new Text(code));
 
       code.Continue("skip-whitespace");
@@ -79,7 +83,7 @@ export default class Element extends Node {
   }
 
   get TagName() {
-    return this.#tag;
+    return this.#project.MapTagName(this.#tag);
   }
 
   get TextContent() {
@@ -229,7 +233,7 @@ export default class Element extends Node {
         return new Js.Call(
           new Js.Access("push", new Js.Reference("result")),
           new Js.Object({
-            tag: new Js.String(this.#tag),
+            tag: new Js.String(this.TagName),
             attr: this.Attributes,
             handlers: this.Handlers,
             children: new Js.Call(
