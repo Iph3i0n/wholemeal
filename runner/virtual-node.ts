@@ -92,7 +92,15 @@ class VirtualElement extends VirtualNode<Ast.Html.Element> {
       const value = next.attr[key];
       const existing = this.#element.getAttribute(key);
       if (existing !== value)
-        if (value != null) this.#element.setAttribute(key, value);
+        if (value != null)
+          if (typeof value === "string" || typeof value === "boolean")
+            this.#element.setAttribute(key, value);
+          // deno-lint-ignore no-explicit-any
+          else if (key in this.#element) (this.#element as any)[key] = value;
+          else
+            console.warn(
+              `Attribute ${key} is not a string or boolean type and has no setter so the value is being ignored.`
+            );
         else this.#element.removeAttribute(key);
     }
 
