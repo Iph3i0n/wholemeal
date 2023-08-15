@@ -56,6 +56,13 @@ export function ${m.FunctionName}(props: CustomElement<{
 }`
 ).join(`
 
-`)}`;
+`)}
+
+export default {${this.Metadata.map(
+      (m) => `
+  ${m.JsDoc(2)}
+  ${m.FunctionName}`
+    ).join(",")}
+}`;
   }
 }
