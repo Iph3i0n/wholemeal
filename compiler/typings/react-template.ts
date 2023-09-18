@@ -3,7 +3,7 @@ import TypingsTemplate from "./template.ts";
 export default class ReactTypingsTemplate extends TypingsTemplate {
   get Script() {
     return `import React from "react";
-import "../bundle.min";
+import "./bundle.min";
 
 ${this.Metadata.map(
   (m) => `

@@ -2,7 +2,7 @@ import TypingsTemplate from "./template.ts";
 
 export default class PreactTypingsTemplate extends TypingsTemplate {
   get Script() {
-    return `import "../bundle.min";`;
+    return `import "./bundle.min";`;
   }
 
   get Typings() {
