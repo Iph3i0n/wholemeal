@@ -33,6 +33,6 @@ export default class Event extends MetadataItem {
   }
 
   get JsDoc() {
-    return `\n * @param props.${this.Name} - ${this.Description.Text}`;
+    return `\n * @param props.on${this.Name} - ${this.Description.Text}`;
   }
 }

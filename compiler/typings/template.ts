@@ -65,4 +65,6 @@ ${this.#metadata
   }
 
   abstract readonly Script: string;
+
+  abstract readonly Typings: string;
 }

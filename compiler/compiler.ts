@@ -99,20 +99,28 @@ export default class Compiler {
       )
     );
 
+    const react_template = new ReactTypingsTemplate(
+      this.#components.map((c) => c.Metadata),
+      project.Docs
+    );
+    await OutputTextFile(Path.join(out_dir, "react.js"), react_template.Script);
     await OutputTextFile(
-      Path.join(out_dir, "typescript", "react.ts"),
-      new ReactTypingsTemplate(
-        this.#components.map((c) => c.Metadata),
-        project.Docs
-      ).Script
+      Path.join(out_dir, "react.d.ts"),
+      react_template.Typings
+    );
+
+    const preact_template = new PreactTypingsTemplate(
+      this.#components.map((c) => c.Metadata),
+      project.Docs
+    );
+    await OutputTextFile(
+      Path.join(out_dir, "preact.js"),
+      preact_template.Script
     );
 
     await OutputTextFile(
-      Path.join(out_dir, "typescript", "preact.ts"),
-      new PreactTypingsTemplate(
-        this.#components.map((c) => c.Metadata),
-        project.Docs
-      ).Script
+      Path.join(out_dir, "preact.d.ts"),
+      preact_template.Typings
     );
   }
 
