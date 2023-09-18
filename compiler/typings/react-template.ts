@@ -15,7 +15,9 @@ module.exports = {
         const r = ref.current;
         if (!r) return;
         ${m.Attr.filter((a) => a.Property)
-          .map((p) => `if (props["${p.Name}"]) r["${p.Name}"] = props["${p.Name}"]`)
+          .map(
+            (p) => `if (props["${p.Name}"]) r["${p.Name}"] = props["${p.Name}"]`
+          )
           .concat(
             m.Events.map(
               (p) =>
@@ -26,7 +28,7 @@ module.exports = {
       }, [ref.current]);
     
       return React.createElement("${m.Name}", { ...props, ref });
-    }`
+    },`
   ).join(`
   `)}
 }`;
