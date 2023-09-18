@@ -81,6 +81,7 @@ type Default = {${this.Metadata.map(
     ).join(",")}
 }
 
-export default Default;`;
+declare const DefaultExport: Default;
+export default DefaultExport;`;
   }
 }
