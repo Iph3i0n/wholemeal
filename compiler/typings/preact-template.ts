@@ -2,7 +2,7 @@ import TypingsTemplate from "./template.ts";
 
 export default class PreactTypingsTemplate extends TypingsTemplate {
   get Script() {
-    return `import "./bundle.min";`;
+    return `require("./bundle.min");`;
   }
 
   get Typings() {
@@ -21,8 +21,9 @@ export default class PreactTypingsTemplate extends TypingsTemplate {
             (m) => `
             ${m.JsDoc(8)}
             "${m.Name}": {
-              ${m.Attr.map((p) => p.Typings).concat(m.Events.map((p) => p.Typings))
-                .join(`;
+              ${m.Attr.map((p) => p.Typings).concat(
+                m.Events.map((p) => p.Typings)
+              ).join(`;
               `)}
             } & HTMLAttributes<HTMLElement>`
           ).join(`;

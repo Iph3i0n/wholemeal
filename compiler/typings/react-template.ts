@@ -2,38 +2,33 @@ import TypingsTemplate from "./template.ts";
 
 export default class ReactTypingsTemplate extends TypingsTemplate {
   get Script() {
-    return `import React from "react";
-import "./bundle.min";
+    return `const React = require("react");
+require("./bundle.min");
 
-${this.Metadata.map(
-  (m) => `
-export function ${m.FunctionName}(props) {
-  const ref = props.ref || React.createRef();
-
-  React.useEffect(() => {
-    const r = ref.current;
-    if (!r) return;
-    ${m.Attr.filter((a) => a.Property)
-      .map((p) => `if (props["${p.Name}"]) r["${p.Name}"] = props["${p.Name}"]`)
-      .concat(
-        m.Events.map(
-          (p) =>
-            `if (props["${p.HandlerName}"]) r.addEventListener("${p.Name}", props["${p.HandlerName}"])`
-        )
-      ).join(`;
-    `)}
-  }, [ref.current]);
-
-  return React.createElement("${m.Name}", { ...props, ref });
-}`
-).join(`
-
-`)}
-
-export default {${this.Metadata.map(
-      (m) => `
-  ${m.FunctionName}`
-    ).join(",")}
+module.exports = {
+  ${this.Metadata.map(
+    (m) => `
+    ${m.FunctionName}: function (props) {
+      const ref = props.ref || React.createRef();
+    
+      React.useEffect(() => {
+        const r = ref.current;
+        if (!r) return;
+        ${m.Attr.filter((a) => a.Property)
+          .map((p) => `if (props["${p.Name}"]) r["${p.Name}"] = props["${p.Name}"]`)
+          .concat(
+            m.Events.map(
+              (p) =>
+                `if (props["${p.HandlerName}"]) r.addEventListener("${p.Name}", props["${p.HandlerName}"])`
+            )
+          ).join(`;
+        `)}
+      }, [ref.current]);
+    
+      return React.createElement("${m.Name}", { ...props, ref });
+    }`
+  ).join(`
+  `)}
 }`;
   }
 
