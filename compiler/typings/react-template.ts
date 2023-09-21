@@ -9,7 +9,7 @@ module.exports = {
   ${this.Metadata.map(
     (m) => `
     ${m.FunctionName}: function (props) {
-      const ref = props.ref || React.createRef();
+      const ref = props.inner_ref || React.useRef();
     
       React.useEffect(() => {
         const r = ref.current;
@@ -66,7 +66,7 @@ ${m.JsDoc(0)}
 export function ${m.FunctionName}(props: CustomElement<{
   ${m.Attr.map((p) => p.Typings).concat(m.Events.map((p) => p.Typings)).join(`;
   `)}
-  ref?: React.RefObject<${m.FunctionName}Element>;
+  inner_ref?: React.RefObject<${m.FunctionName}Element>;
 }>): React.DOMElement<React.HTMLAttributes, ${m.FunctionName}Element>;`
 ).join(`
 `)}
