@@ -9,9 +9,6 @@ export default class PreactTypingsTemplate extends TypingsTemplate {
     return `
     ${this.ExtraDeclarations}
     
-    
-    ${this.GlobalDeclarations}
-    
     declare module "preact/src/jsx" {
       namespace JSXInternal {
         import HTMLAttributes = JSXInternal.HTMLAttributes;
@@ -30,6 +27,8 @@ export default class PreactTypingsTemplate extends TypingsTemplate {
           `)};
         }
       }
+    
+      ${this.GlobalDeclarations}
     }`;
   }
 }

@@ -28,7 +28,7 @@ export default abstract class TypingsTemplate {
     return `
 ${this.#metadata
   .map(
-    (m) => `declare class ${m.FunctionName}Element extends HTMLElement {
+    (m) => `class ${m.FunctionName}Element extends HTMLElement {
   ${m.Attr.map(
     (a) => `/** ${a.Description.Text} */
     "${a.Name}": ${a.Type ?? "string"};`

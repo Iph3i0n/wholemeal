@@ -42,7 +42,6 @@ ${this.ExtraDeclarations}
 type CustomElement<T> = T & Partial<React.HTMLAttributes<T> & { children?: React.ReactNode }>;
 
 
-${this.GlobalDeclarations}
 
 declare global {
   namespace JSX {
@@ -58,6 +57,8 @@ declare global {
       `)};
     }
   }
+  
+  ${this.GlobalDeclarations}
 }
 
 ${this.Metadata.map(
