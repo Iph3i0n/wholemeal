@@ -57,7 +57,7 @@ declare global {
       `)};
     }
   }
-  
+
   ${this.GlobalDeclarations}
 }
 
@@ -67,7 +67,7 @@ ${m.JsDoc(0)}
 export function ${m.FunctionName}(props: CustomElement<{
   ${m.Attr.map((p) => p.Typings).concat(m.Events.map((p) => p.Typings)).join(`;
   `)}
-  inner_ref?: React.RefObject<${m.FunctionName}Element>;
+  inner_ref?: React.MutableRefObject<${m.FunctionName}Element>;
 }>): React.DOMElement<React.HTMLAttributes, ${m.FunctionName}Element>;`
 ).join(`
 `)}
