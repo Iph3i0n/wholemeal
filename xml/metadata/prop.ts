@@ -1,5 +1,4 @@
 import MetadataItem from "./base.ts";
-import * as Js from "../../writer/mod.ts";
 import Description from "./description.ts";
 import ToPascal from "./to-pascal.ts";
 
