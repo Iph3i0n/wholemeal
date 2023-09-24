@@ -14,6 +14,7 @@ module.exports = {
       React.useEffect(() => {
         const r = ref.current;
         if (!r) return;
+        let teardown = () => {};
         ${m.Attr.filter((a) => a.Property)
           .map(
             (p) => `if (props["${p.Name}"]) r["${p.Name}"] = props["${p.Name}"]`
@@ -21,10 +22,18 @@ module.exports = {
           .concat(
             m.Events.map(
               (p) =>
-                `if (props["${p.HandlerName}"]) r.addEventListener("${p.Name}", props["${p.HandlerName}"])`
+                `if (props["${p.HandlerName}"]) {
+                  r.addEventListener("${p.Name}", props["${p.HandlerName}"]);
+                  const old_teardown = teardown;
+                  teardown = () => {
+                    old_teardown();
+                    r.removeEventListener("${p.Name}", props["${p.HandlerName}"]);
+                  }
+                }`
             )
-          ).join(`;
+          ).join(`
         `)}
+        return teardown;
       }, [ref.current]);
     
       return React.createElement("${m.Name}", { ...props, ref });
