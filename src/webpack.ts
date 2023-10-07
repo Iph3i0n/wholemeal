@@ -1,15 +1,8 @@
 import { urlToRequest } from "loader-utils";
 import { validate } from "schema-utils";
 import * as Webpack from "webpack";
-
-const schema = {
-  type: "object",
-  properties: {
-    test: {
-      type: "string",
-    },
-  },
-};
+import Component from "./xml/component";
+import Template from "./compiler/template";
 
 export default function (this: Webpack.LoaderContext<any>, source: string) {
   const callback = this.async();
@@ -26,5 +19,8 @@ export default function (this: Webpack.LoaderContext<any>, source: string) {
       baseDataPath: "options",
     }
   );
-  return `export default ${JSON.stringify(source)}`;
+
+  const component = new Component(source);
+  const template = new Template(component);
+  return template.JavaScript;
 }
