@@ -6,8 +6,7 @@ import Sheet from "../pss/sheet";
 import * as Js from "../writer/mod";
 import Metadata from "./metadata/mod";
 
-const IsImport =
-  /import([ \n\t]*(?:[^ \n\t\{\}]+[ \n\t]*,?)?(?:[ \n\t]*\{(?:[ \n\t]*[^ \n\t"'\{\}]+[ \n\t]*,?)+\})?[ \n\t]*)from[ \n\t]*(['"])([^'"\n]+)(?:['"])/gm;
+const IsImport = /import (?:(?:[^;'"]|\n)+ from )?['"].+['"]/gm;
 
 const Blocks: Array<(s: string) => string> = [
   (s) =>
