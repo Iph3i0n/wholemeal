@@ -4,8 +4,12 @@ import * as Webpack from "webpack";
 import Component from "./xml/component";
 import Template from "./compiler/template";
 
-export default function (this: Webpack.LoaderContext<any>, source: string) {
-  const callback = this.async();
+type StdProps = {};
+
+export default function (
+  this: Webpack.LoaderContext<StdProps>,
+  source: string
+) {
   const options = this.getOptions();
 
   validate(
@@ -15,7 +19,7 @@ export default function (this: Webpack.LoaderContext<any>, source: string) {
     },
     options,
     {
-      name: "Wholemeal Loader",
+      name: "Wholemeal Std Loader",
       baseDataPath: "options",
     }
   );

@@ -2,7 +2,7 @@
   "name": "@ipheion/wholemeal",
   "version": "0.0.1",
   "description": "A language for creating web components",
-  "main": "dist/index.js",
+  "main": "./dist/mod.js",
   "scripts": {
     "build": "tsc",
     "test": "jest",
@@ -23,6 +23,8 @@
   "homepage": "https://github.com/Iph3i0n/wholemeal#readme",
   "dependencies": {
     "@ipheion/safe-type": "^2.2.1",
+    "element-internals-polyfill": "^1.3.8",
+    "form-request-submit-polyfill": "^2.0.0",
     "loader-utils": "^3.2.1",
     "schema-utils": "^4.2.0"
   },
@@ -36,5 +38,10 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "exports": {
+    "./std": "./dist/std-loader.js",
+    "./pss": "./dist/pss-loader.js",
+    ".": "./dist/mod.js"
   }
 }

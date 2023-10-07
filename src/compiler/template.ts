@@ -16,7 +16,7 @@ export default class Template {
     const base_import = !this.#data.Metadata.Base
       ? `import { ComponentBase } from "${Path.resolve(
           __dirname,
-          "../runner/component.ts"
+          "../runner/component.js"
         )}";`
       : "";
     const result = `
@@ -28,7 +28,7 @@ import {
   PropsEvent,
   CreateRef,
   BeforeRenderEvent
-} from "${Path.resolve(__dirname, "../mod.ts")}";
+} from "${Path.resolve(__dirname, "../mod.js")}";
 ${this.#data.Metadata.ScriptImports};
 ${this.#data.ScriptImports}
 

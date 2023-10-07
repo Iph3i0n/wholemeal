@@ -1,5 +1,5 @@
-import "https://cdn.skypack.dev/element-internals-polyfill";
-import "https://cdndelivr.net/npm/form-request-submit-polyfill";
+import "element-internals-polyfill";
+import "form-request-submit-polyfill";
 
 import { Ast } from "../types/ast";
 import VirtualDom from "./virtual-node";
