@@ -1,0 +1,38 @@
+{
+  "name": "@ipheion/wholemeal",
+  "version": "0.0.1",
+  "description": "A language for creating web components",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Iph3i0n/wholemeal.git"
+  },
+  "keywords": [
+    "web-components"
+  ],
+  "author": "paultaylor",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Iph3i0n/wholemeal/issues"
+  },
+  "homepage": "https://github.com/Iph3i0n/wholemeal#readme",
+  "dependencies": {
+    "@ipheion/safe-type": "^2.2.1",
+    "loader-utils": "^3.2.1",
+    "schema-utils": "^4.2.0"
+  },
+  "devDependencies": {
+    "@types/loader-utils": "^2.0.4",
+    "custom-elements-manifest": "^2.0.0",
+    "typescript": "^5.2.2",
+    "webpack": "^5.88.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

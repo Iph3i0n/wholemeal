@@ -1,3 +1,4 @@
 dist
 deno.lock
 templates/dist
+node_modules
