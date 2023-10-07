@@ -2,48 +2,44 @@ import TypingsTemplate from "./template";
 
 export default class ReactTypingsTemplate extends TypingsTemplate {
   get Script() {
+    const m = this.Metadata;
     return `const React = require("react");
-require("./bundle.min");
 
-module.exports = {
-  ${this.Metadata.map(
-    (m) => `
-    ${m.FunctionName}: function (props) {
-      const ref = props.inner_ref || React.useRef();
-    
-      React.useEffect(() => {
-        const r = ref.current;
-        if (!r) return;
-        let teardown = () => {};
-        ${m.Attr.filter((a) => a.Property)
-          .map(
-            (p) => `if (props["${p.Name}"]) r["${p.Name}"] = props["${p.Name}"]`
-          )
-          .concat(
-            m.Events.map(
-              (p) =>
-                `if (props["${p.HandlerName}"]) {
-                  r.addEventListener("${p.Name}", props["${p.HandlerName}"]);
-                  const old_teardown = teardown;
-                  teardown = () => {
-                    old_teardown();
-                    r.removeEventListener("${p.Name}", props["${p.HandlerName}"]);
-                  }
-                }`
-            )
-          ).join(`
-        `)}
-        return teardown;
-      }, [ref.current]);
-    
-      return React.createElement("${m.Name}", { ...props, ref });
-    },`
+module.exports = function ${m.FunctionName}(props) {
+  const ref = props.inner_ref || React.useRef();
+
+  ${m.Attr.filter((a) => a.Property).map(
+    (p) => `React.useEffect(() => {
+    const r = ref.current;
+    if (!r) return;
+
+    r["${p.Name}"] = props["${p.Name}"];
+  }, [ref.current, props["${p.Name}"]]);`
   ).join(`
   `)}
+
+
+  ${m.Events.map(
+    (p) => `React.useEffect(() => {
+    const r = ref.current;
+    if (!r) return;
+
+    if (props["${p.HandlerName}"]) {
+      r.addEventListener("${p.Name}", props["${p.HandlerName}"]);
+      return () => {
+        r.removeEventListener("${p.Name}", props["${p.HandlerName}"]);
+      }
+    }
+  }, [ref.current, props["${p.HandlerName}"]]);`
+  ).join(`
+  `)}
+
+  return React.createElement("${m.Name}", { ...props, ref });
 }`;
   }
 
   get Typings() {
+    const m = this.Metadata;
     return `import React from "react";
     
 ${this.ExtraDeclarations}
@@ -55,38 +51,27 @@ type CustomElement<T> = T & Partial<React.HTMLAttributes<T> & { children?: React
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      ${this.Metadata.map(
-        (m) => `
-        ${m.JsDoc(8)}
+      ${m.JsDoc(8)}
         "${m.Name}": CustomElement<{
           ${m.Attr.map((p) => p.Typings).join(`;
           `)}
-        }>`
-      ).join(`;
-      `)};
+        }>
     }
   }
 
   ${this.GlobalDeclarations}
 }
 
-${this.Metadata.map(
-  (m) => `
 ${m.JsDoc(0)}
-export function ${m.FunctionName}(props: CustomElement<{
+export default function ${m.FunctionName}(props: CustomElement<{
   ${m.Attr.map((p) => p.Typings).concat(m.Events.map((p) => p.Typings)).join(`;
   `)}
   inner_ref?: React.MutableRefObject<${m.FunctionName}Element | undefined>;
-}>): React.DOMElement<React.HTMLAttributes, ${m.FunctionName}Element>;`
-).join(`
-`)}
+}>): React.DOMElement<React.HTMLAttributes, ${m.FunctionName}Element>;
 
-type Default = {${this.Metadata.map(
-      (m) => `
+type Default = {
   ${m.JsDoc(2)}
-  ${m.FunctionName}: typeof ${m.FunctionName}`
-    ).join(",")}
-}
+  ${m.FunctionName}: typeof ${m.FunctionName}
 
 declare const DefaultExport: Default;
 export default DefaultExport;`;

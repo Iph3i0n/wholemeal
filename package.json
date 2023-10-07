@@ -42,6 +42,7 @@
   "exports": {
     "./std": "./dist/std-loader.js",
     "./pss": "./dist/pss-loader.js",
-    ".": "./dist/mod.js"
+    ".": "./dist/mod.js",
+    "./css": "./dist/runner/css.js"
   }
 }

@@ -1,10 +1,12 @@
-import { urlToRequest } from "loader-utils";
-import { validate } from "schema-utils";
 import * as Webpack from "webpack";
 import Component from "./xml/component";
 import Template from "./compiler/template";
+import ReactTypingsTemplate from "./compiler/typings/react-template";
+import PreactTypingsTemplate from "./compiler/typings/preact-template";
 
-type StdProps = {};
+type StdProps = {
+  framework?: string;
+};
 
 export default function (
   this: Webpack.LoaderContext<StdProps>,
@@ -12,19 +14,23 @@ export default function (
 ) {
   const options = this.getOptions();
 
-  validate(
-    {
-      type: "object",
-      properties: {},
-    },
-    options,
-    {
-      name: "Wholemeal Std Loader",
-      baseDataPath: "options",
-    }
-  );
-
   const component = new Component(source);
   const template = new Template(component);
-  return template.JavaScript;
+  let result = template.JavaScript;
+
+  if (options.framework === "react") {
+    const react_template = new ReactTypingsTemplate(component.Metadata, {
+      value_sets: [],
+    });
+    result += "\n" + react_template.Script;
+  }
+
+  if (options.framework === "preact") {
+    const react_template = new PreactTypingsTemplate(component.Metadata, {
+      value_sets: [],
+    });
+    result += "\n" + react_template.Script;
+  }
+
+  return result;
 }
