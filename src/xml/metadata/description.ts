@@ -1,4 +1,4 @@
-import MetadataItem from "./base.js";
+import MetadataItem from "./base";
 
 export default class Description extends MetadataItem {
   get Text() {

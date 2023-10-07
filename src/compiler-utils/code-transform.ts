@@ -1,4 +1,4 @@
-import StringIterator from "./string-iterator.js";
+import StringIterator from "./string-iterator";
 
 export default class Code implements Iterable<string> {
   readonly #data: string;

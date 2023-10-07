@@ -1,18 +1,17 @@
 import "https://cdn.skypack.dev/element-internals-polyfill";
-import "https://cdn.jsdelivr.net/npm/form-request-submit-polyfill";
+import "https://cdndelivr.net/npm/form-request-submit-polyfill";
 
-import { Ast } from "../types/ast.js";
-import VirtualDom from "./virtual-node.js";
-import RenderSheet from "./css.js";
+import { Ast } from "../types/ast";
+import VirtualDom from "./virtual-node";
+import RenderSheet from "./css";
 import {
   LoadedEvent,
   PropsEvent,
   RenderEvent,
   ShouldRender,
   BeforeRenderEvent,
-} from "./events.js";
+} from "./events";
 
-// deno-lint-ignore no-explicit-any
 function PropValue(value: string): any {
   return value === ""
     ? true
@@ -23,7 +22,7 @@ function PropValue(value: string): any {
     : value;
 }
 
-type Handler<T extends Event> = (event: Event) => void;
+type Handler<T extends Event> = (event: T) => void;
 
 export abstract class ComponentBase extends HTMLElement {
   readonly #root: ShadowRoot;
@@ -70,7 +69,7 @@ export abstract class ComponentBase extends HTMLElement {
     this.#render();
 
     const on_render = (() => {
-      let timeout = 0;
+      let timeout: number | NodeJS.Timeout = 0;
       return () => {
         if (timeout) clearTimeout(timeout);
 
@@ -118,7 +117,7 @@ export abstract class ComponentBase extends HTMLElement {
   }
 
   set after_props(handler: Handler<PropsEvent>) {
-    this.addEventListener(PropsEvent.Key, handler);
+    this.addEventListener(PropsEvent.Key, handler as any);
   }
 
   handler_for(name: string) {

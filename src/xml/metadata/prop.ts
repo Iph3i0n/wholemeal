@@ -1,6 +1,6 @@
-import MetadataItem from "./base.js";
-import Description from "./description.js";
-import ToPascal from "./to-pascal.js";
+import MetadataItem from "./base";
+import Description from "./description";
+import ToPascal from "./to-pascal";
 
 export default class Prop extends MetadataItem {
   get Name() {

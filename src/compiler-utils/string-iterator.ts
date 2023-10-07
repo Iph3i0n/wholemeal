@@ -18,7 +18,8 @@ export default class StringIterator {
     let in_string = this.#next.value === STRING_CHAR;
     const is_match = () => {
       if (this.#next.done) return false;
-      if (lookup instanceof RegExp) return !this.#next.value.match(lookup)?.length;
+      if (lookup instanceof RegExp)
+        return !this.#next.value.match(lookup)?.length;
       return this.#next.value !== lookup;
     };
 

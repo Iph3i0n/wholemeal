@@ -1,5 +1,5 @@
-import MetadataItem from "./base.js";
-import * as Js from "../../writer/mod.js";
+import MetadataItem from "./base";
+import * as Js from "../../writer/mod";
 
 export default class Import extends MetadataItem {
   get #use() {

@@ -1,5 +1,5 @@
-import MetadataItem from "./base.js";
-import Description from "./description.js";
+import MetadataItem from "./base";
+import Description from "./description";
 
 export default class Slot extends MetadataItem {
   get Name() {

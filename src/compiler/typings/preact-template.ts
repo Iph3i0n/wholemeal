@@ -1,4 +1,4 @@
-import TypingsTemplate from "./template.js";
+import TypingsTemplate from "./template";
 
 export default class PreactTypingsTemplate extends TypingsTemplate {
   get Script() {

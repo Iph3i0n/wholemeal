@@ -1,4 +1,4 @@
-import { Ast } from "../types/ast.js";
+import { Ast } from "../types/ast";
 
 function IsProperty(
   data: Ast.Css.Property | Ast.Css.PropertyBlock

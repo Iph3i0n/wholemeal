@@ -1,5 +1,5 @@
-import { Runner } from "../../types/runner.js";
-import Metadata from "../../xml/metadata/mod.js";
+import { Runner } from "../../types/runner";
+import Metadata from "../../xml/metadata/mod";
 
 export default abstract class TypingsTemplate {
   readonly #metadata: Array<Metadata>;

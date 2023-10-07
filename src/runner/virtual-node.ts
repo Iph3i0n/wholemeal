@@ -1,6 +1,6 @@
-import { Ast } from "../types/ast.js";
-import EventManager from "./event-manager.js";
-import { RenderChildren, RenderText } from "./html.js";
+import { Ast } from "../types/ast";
+import EventManager from "./event-manager";
+import { RenderChildren, RenderText } from "./html";
 
 abstract class VirtualNode<TNode extends Ast.Html.Node> {
   node: TNode;

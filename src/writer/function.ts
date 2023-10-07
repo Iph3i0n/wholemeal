@@ -1,4 +1,4 @@
-import Base from "./base.js";
+import Base from "./base";
 
 export default class FunctionWriter extends Base {
   readonly #args: Array<Base>;

@@ -1,6 +1,6 @@
-import { PssBlock } from "./block.js";
-import * as Js from "../writer/mod.js";
-import StringIterator from "../compiler-utils/string-iterator.js";
+import { PssBlock } from "./block";
+import * as Js from "../writer/mod";
+import StringIterator from "../compiler-utils/string-iterator";
 
 export class PssAtStatement extends PssBlock {
   static IsValid(data: string) {

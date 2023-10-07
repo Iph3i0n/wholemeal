@@ -1,11 +1,10 @@
-import Code from "./code.js";
-import Node from "./node.js";
-import Text from "./text.js";
-import Element from "./element.js";
-import Sheet from "../pss/sheet.js";
-import * as Js from "../writer/mod.js";
-import Metadata from "./metadata/mod.js";
-import { Project } from "../compiler/project.js";
+import Code from "./code";
+import Node from "./node";
+import Text from "./text";
+import Element from "./element";
+import Sheet from "../pss/sheet";
+import * as Js from "../writer/mod";
+import Metadata from "./metadata/mod";
 
 const IsImport =
   /import([ \n\t]*(?:[^ \n\t\{\}]+[ \n\t]*,?)?(?:[ \n\t]*\{(?:[ \n\t]*[^ \n\t"'\{\}]+[ \n\t]*,?)+\})?[ \n\t]*)from[ \n\t]*(['"])([^'"\n]+)(?:['"])/gm;
@@ -40,16 +39,13 @@ const Blocks: Array<(s: string) => string> = [
 
 export default class Component {
   readonly #children: Array<Node> = [];
-  readonly #project: Project;
 
-  constructor(code: string, project: Project) {
+  constructor(code: string) {
     const code_object = new Code(code);
     while (!code_object.Done)
       if (code_object.Current === "<")
-        this.#children.push(new Element(code_object, project));
+        this.#children.push(new Element(code_object));
       else this.#children.push(new Text(code_object));
-
-    this.#project = project;
   }
 
   #find_tag(name: string) {
@@ -107,6 +103,6 @@ export default class Component {
     if (!tag || !tag.RawAttribute.name)
       throw new Error("Components must have a meta tag with a name attribute");
 
-    return new Metadata(tag, this.#project);
+    return new Metadata(tag);
   }
 }

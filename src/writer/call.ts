@@ -1,4 +1,4 @@
-import BaseWriter from "./base.js";
+import BaseWriter from "./base";
 
 export default class CallWriter extends BaseWriter {
   readonly #definition: BaseWriter;

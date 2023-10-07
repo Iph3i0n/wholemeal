@@ -1,7 +1,7 @@
-import * as Js from "../writer/mod.js";
-import { PssProperty } from "./property.js";
-import StringIterator from "../compiler-utils/string-iterator.js";
-import { PssBlock } from "./block.js";
+import * as Js from "../writer/mod";
+import { PssProperty } from "./property";
+import StringIterator from "../compiler-utils/string-iterator";
+import { PssBlock } from "./block";
 
 export class PssRule extends PssBlock {
   static IsValid(data: string) {

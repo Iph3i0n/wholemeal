@@ -1,4 +1,4 @@
-import Base from "./base.js";
+import Base from "./base";
 
 export default class ReferenceWriter extends Base {
   readonly #target: string;

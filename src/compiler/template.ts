@@ -1,5 +1,6 @@
-import Component from "../xml/component.js";
-import * as Js from "../writer/mod.js";
+import Component from "../xml/component";
+import * as Js from "../writer/mod";
+import Path from "path";
 
 export default class Template {
   readonly #data: Component;
@@ -13,7 +14,8 @@ export default class Template {
     const name = this.#data.Metadata.Name;
     const base = this.#data.Metadata.Base?.Name ?? "ComponentBase";
     const base_import = !this.#data.Metadata.Base
-      ? `import { ComponentBase } from "${import.meta.resolve(
+      ? `import { ComponentBase } from "${Path.resolve(
+          __dirname,
           "../runner/component.ts"
         )}";`
       : "";
@@ -26,7 +28,7 @@ import {
   PropsEvent,
   CreateRef,
   BeforeRenderEvent
-} from "${import.meta.resolve("../mod.ts")}";
+} from "${Path.resolve(__dirname, "../mod.ts")}";
 ${this.#data.Metadata.ScriptImports};
 ${this.#data.ScriptImports}
 

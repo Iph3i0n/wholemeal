@@ -1,4 +1,4 @@
-import * as Js from "../writer/mod.js";
+import * as Js from "../writer/mod";
 
 const NodeSymbol = Symbol();
 

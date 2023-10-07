@@ -1,6 +1,6 @@
-import MetadataItem from "./base.js";
-import Description from "./description.js";
-import Key from "./key.js";
+import MetadataItem from "./base";
+import Description from "./description";
+import Key from "./key";
 
 export default class Event extends MetadataItem {
   get Name() {

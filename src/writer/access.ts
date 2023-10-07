@@ -1,4 +1,4 @@
-import BaseWriter from "./base.js";
+import BaseWriter from "./base";
 
 export default class AccessWriter extends BaseWriter {
   readonly #name: string;

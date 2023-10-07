@@ -1,4 +1,4 @@
-import Element from "../element.js";
+import Element from "../element";
 
 export default abstract class MetadataItem {
   readonly #data: Element;

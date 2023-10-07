@@ -1,5 +1,5 @@
-import * as Js from "../writer/mod.js";
-import StringIterator from "../compiler-utils/string-iterator.js";
+import * as Js from "../writer/mod";
+import StringIterator from "../compiler-utils/string-iterator";
 
 export class PssProperty {
   readonly #data: string;

@@ -1,6 +1,6 @@
-import * as Js from "../writer/mod.js";
-import Code from "./code.js";
-import Node from "./node.js";
+import * as Js from "../writer/mod";
+import Code from "./code";
+import Node from "./node";
 
 export default class Text extends Node {
   readonly #data: string;

@@ -1,13 +1,13 @@
-import Code from "../compiler-utils/code-transform.js";
-import * as Js from "../writer/mod.js";
-import { PssAtBlock } from "./at-block.js";
-import { PssAtStatement } from "./at-statement.js";
-import { PssForBlock } from "./for-block.js";
-import { PssIfBlock } from "./if-block.js";
-import { PssInsertStatement } from "./insert-statement.js";
-import { PssJsStatement } from "./js-statement.js";
-import { PssMediaQuery } from "./media-query.js";
-import { PssRule } from "./rule.js";
+import Code from "../compiler-utils/code-transform";
+import * as Js from "../writer/mod";
+import { PssAtBlock } from "./at-block";
+import { PssAtStatement } from "./at-statement";
+import { PssForBlock } from "./for-block";
+import { PssIfBlock } from "./if-block";
+import { PssInsertStatement } from "./insert-statement";
+import { PssJsStatement } from "./js-statement";
+import { PssMediaQuery } from "./media-query";
+import { PssRule } from "./rule";
 
 export default class Sheet {
   readonly #data: Code;

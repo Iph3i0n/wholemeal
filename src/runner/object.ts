@@ -1,4 +1,3 @@
-// deno-lint-ignore-file no-explicit-any no-prototype-builtins
 export default {
   Keys<T extends Record<string, unknown>>(subject: T): (keyof T)[] {
     return Object.keys(subject) as any;

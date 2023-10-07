@@ -1,5 +1,5 @@
-import { Ast } from "../types/ast.js";
-import EventManager from "./event-manager.js";
+import { Ast } from "../types/ast";
+import EventManager from "./event-manager";
 
 export function RenderElement(element: Ast.Html.Element) {
   const result = document.createElement(element.tag);
@@ -21,6 +21,7 @@ export function RenderText(element: Ast.Html.Text) {
 
 export function RenderNode(node: Ast.Html.Node) {
   if (typeof node === "string") return RenderText(node);
+  if (!node) return "";
   return RenderElement(node);
 }
 

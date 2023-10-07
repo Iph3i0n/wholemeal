@@ -1,8 +1,7 @@
-import * as Js from "../writer/mod.js";
-import Code from "./code.js";
-import Node from "./node.js";
-import Text from "./text.js";
-import { Project } from "../compiler/project.js";
+import * as Js from "../writer/mod";
+import Code from "./code";
+import Node from "./node";
+import Text from "./text";
 
 const AllText = ["script", "style"];
 
@@ -11,15 +10,13 @@ export default class Element extends Node {
   readonly #attributes: Record<string, string | boolean> = {};
   readonly #children: Array<Node> = [];
   readonly #text_content: string = "";
-  readonly #project: Project;
 
   #error(message: string, context: unknown) {
     return new Error(`${message}\n${JSON.stringify(context, undefined, 2)}`);
   }
 
-  constructor(code: Code, project: Project) {
+  constructor(code: Code) {
     super();
-    this.#project = project;
     if (code.Current !== "<")
       throw this.#error("Elements must start with a <", {});
     code.Continue("skip-whitespace");
@@ -57,8 +54,7 @@ export default class Element extends Node {
         if (AllText.includes(this.#tag)) {
           this.#text_content += code.Current;
           code.Continue();
-        } else if (code.Current === "<")
-          this.#children.push(new Element(code, project));
+        } else if (code.Current === "<") this.#children.push(new Element(code));
         else this.#children.push(new Text(code));
 
       code.Continue("skip-whitespace");
@@ -83,7 +79,7 @@ export default class Element extends Node {
   }
 
   get TagName() {
-    return this.#project.MapTagName(this.#tag);
+    return this.#tag;
   }
 
   get TextContent() {

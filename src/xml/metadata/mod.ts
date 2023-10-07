@@ -1,25 +1,20 @@
-import Element from "../element.js";
-import MetadataItem from "./base.js";
-import Description from "./description.js";
-import Event from "./event.js";
-import Import from "./import.js";
-import Prop from "./prop.js";
-import Slot from "./slot.js";
-import * as Js from "../../writer/mod.js";
-import { CustomManifest } from "../../deps.ts";
-import ToPascal from "./to-pascal.js";
-import { Project } from "../../compiler/project.js";
-
+import Element from "../element";
+import MetadataItem from "./base";
+import Description from "./description";
+import Event from "./event";
+import Import from "./import";
+import Prop from "./prop";
+import Slot from "./slot";
+import * as Js from "../../writer/mod";
+import ToPascal from "./to-pascal";
+import * as CustomManifest from "custom-elements-manifest";
 export default class Metadata extends MetadataItem {
-  readonly #project: Project;
-
-  constructor(data: Element, project: Project) {
+  constructor(data: Element) {
     super(data);
-    this.#project = project;
   }
 
   get Name() {
-    return this.#project.GetTagName(this.BaseName);
+    return this.Data.RawAttribute.name.toString();
   }
 
   get BaseName() {

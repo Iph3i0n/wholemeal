@@ -1,5 +1,5 @@
-import { PssBlock } from "./block.js";
-import * as Js from "../writer/mod.js";
+import { PssBlock } from "./block";
+import * as Js from "../writer/mod";
 
 export class PssJsStatement extends PssBlock {
   static IsValid(data: string) {
