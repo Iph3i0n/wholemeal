@@ -1,7 +1,7 @@
 import { Runner } from "../../types/runner";
 import Metadata from "../../xml/metadata/mod";
 
-export default abstract class TypingsTemplate {
+export default class TypingsTemplate {
   readonly #metadata: Metadata;
   readonly #extra_types: Runner.Project["docs"];
 
@@ -24,7 +24,15 @@ export default abstract class TypingsTemplate {
       .join(`;\n`);
   }
 
-  get GlobalDeclarations() {
+  get Metadata() {
+    return this.#metadata;
+  }
+
+  get Script() {
+    return "";
+  }
+
+  get Typings() {
     const m = this.#metadata;
     return `class ${m.FunctionName}Element extends HTMLElement {
   ${m.Attr.map(
@@ -50,12 +58,4 @@ ${m.Events.map(
   
 `;
   }
-
-  get Metadata() {
-    return this.#metadata;
-  }
-
-  abstract readonly Script: string;
-
-  abstract readonly Typings: string;
 }

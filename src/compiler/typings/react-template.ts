@@ -5,6 +5,8 @@ export default class ReactTypingsTemplate extends TypingsTemplate {
     const m = this.Metadata;
     return `const React = require("react");
 
+${super.Script}
+
 module.exports = function ${m.FunctionName}(props) {
   const ref = props.inner_ref || React.useRef();
 
@@ -59,7 +61,7 @@ declare global {
     }
   }
 
-  ${this.GlobalDeclarations}
+  ${super.Typings}
 }
 
 ${m.JsDoc(0)}
@@ -67,13 +69,6 @@ export default function ${m.FunctionName}(props: CustomElement<{
   ${m.Attr.map((p) => p.Typings).concat(m.Events.map((p) => p.Typings)).join(`;
   `)}
   inner_ref?: React.MutableRefObject<${m.FunctionName}Element | undefined>;
-}>): React.DOMElement<React.HTMLAttributes, ${m.FunctionName}Element>;
-
-type Default = {
-  ${m.JsDoc(2)}
-  ${m.FunctionName}: typeof ${m.FunctionName}
-
-declare const DefaultExport: Default;
-export default DefaultExport;`;
+}>): React.DOMElement<React.HTMLAttributes, ${m.FunctionName}Element>;`;
   }
 }
