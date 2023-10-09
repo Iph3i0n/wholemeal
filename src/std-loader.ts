@@ -40,30 +40,54 @@ export default function (this: Webpack.LoaderContext<unknown>, source: string) {
 
   const component = new Component(source);
   const template = new Template(component);
+
+  if (!this.resourceQuery) {
+    return `import ComponentWrapper from "${Path.resolve(
+      __dirname,
+      "runner",
+      "component-wrapper"
+    )}";
+
+export default class ${
+      component.Metadata.FunctionName
+    }Element extends ComponentWrapper {
+  
+  Initialiser(self) {
+    return import("${
+      this.resourcePath
+    }?actual=true").then(r => new r.default(self));
+  }
+}
+
+customElements.define("${component.Metadata.Name}", ${
+      component.Metadata.FunctionName
+    }Element);`;
+  }
+
   let result = template.JavaScript;
 
   const package_json = read_json("./package.json");
   const extra_types = package_json.wholemeal;
 
-  const meta_template = PatternMatch(
-    IsLiteral("native"),
-    IsLiteral("react"),
-    IsLiteral("preact")
-  )(
-    () => new TypingsTemplate(component.Metadata, extra_types),
-    () => new ReactTypingsTemplate(component.Metadata, extra_types),
-    () => new PreactTypingsTemplate(component.Metadata, extra_types)
-  )(options.framework ?? "native");
+  // const meta_template = PatternMatch(
+  //   IsLiteral("native"),
+  //   IsLiteral("react"),
+  //   IsLiteral("preact")
+  // )(
+  //   () => new TypingsTemplate(component.Metadata, extra_types),
+  //   () => new ReactTypingsTemplate(component.Metadata, extra_types),
+  //   () => new PreactTypingsTemplate(component.Metadata, extra_types)
+  // )(options.framework ?? "native");
 
-  result += "\n" + meta_template.Script;
+  // result += "\n" + meta_template.Script;
 
-  if (options.typings) {
-    const ts_config = read_json("./tsconfig.json");
-    const root: string =
-      ts_config?.compilerOptions?.rootDir ?? this.rootContext;
-    const target = Path.relative(root, this.resourcePath) + ".d.ts";
-    this.emitFile(target, meta_template.Typings);
-  }
+  // if (options.typings) {
+  //   const ts_config = read_json("./tsconfig.json");
+  //   const root: string =
+  //     ts_config?.compilerOptions?.rootDir ?? this.rootContext;
+  //   const target = Path.relative(root, this.resourcePath) + ".d.ts";
+  //   this.emitFile(target, meta_template.Typings);
+  // }
 
   return result;
 }

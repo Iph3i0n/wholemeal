@@ -32,7 +32,7 @@ import {
 ${this.#data.Metadata.ScriptImports};
 ${this.#data.ScriptImports}
 
-export class ${function_name} extends ${base} {
+export default class ${function_name} extends ${base} {
   get aria() {
     return ${JSON.stringify(this.#data.Metadata.Aria)};
   }
@@ -85,8 +85,6 @@ export class ${function_name} extends ${base} {
     };
   }
 }
-
-customElements.define("${name}", ${function_name});
 `;
 
     return result;

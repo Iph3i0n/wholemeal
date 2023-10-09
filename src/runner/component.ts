@@ -11,6 +11,7 @@ import {
   ShouldRender,
   BeforeRenderEvent,
 } from "./events";
+import { IElementInternals } from "element-internals-polyfill";
 
 function PropValue(value: string): any {
   return value === ""
@@ -24,9 +25,10 @@ function PropValue(value: string): any {
 
 type Handler<T extends Event> = (event: T) => void;
 
-export abstract class ComponentBase extends HTMLElement {
+abstract class Base {
+  readonly #ele: HTMLElement;
   readonly #root: ShadowRoot;
-  readonly #internals: ElementInternals;
+  readonly #internals: IElementInternals;
   readonly #styles: HTMLStyleElement;
   readonly #virtual_dom: VirtualDom;
 
@@ -39,13 +41,34 @@ export abstract class ComponentBase extends HTMLElement {
     css: () => Ast.Css.Sheet;
   }>;
 
-  constructor() {
-    super();
-    this.#root = this.attachShadow({ mode: "open" });
-    this.#internals = this.attachInternals();
+  constructor(ele: HTMLElement) {
+    this.#ele = ele;
+    this.#root = this.#ele.attachShadow({ mode: "open" });
+    this.#internals = this.#ele.attachInternals();
     this.#styles = document.createElement("style");
     this.#root.append(this.#styles);
     this.#virtual_dom = new VirtualDom(this.#root);
+
+    const e = ele as any;
+    const self = this as any;
+    for (const key in e)
+      if (!self[key])
+        if (typeof e[key] === "function")
+          self[key] = (...args: Array<any>) => e[key](...args);
+        else {
+          Object.defineProperty(self, key, {
+            get() {
+              return e[key];
+            },
+            set(val) {
+              e[key] = val;
+            },
+          });
+        }
+  }
+
+  get matcher() {
+    return this.#ele;
   }
 
   set styles(data: string) {
@@ -78,22 +101,26 @@ export abstract class ComponentBase extends HTMLElement {
         }, 5);
       };
     })();
-    this.addEventListener(ShouldRender.Key, on_render);
-    this.dispatchEvent(new LoadedEvent());
+    this.#ele.addEventListener(ShouldRender.Key, on_render);
+    this.#ele.dispatchEvent(new LoadedEvent());
   }
 
+  disconnectedCallback() {}
+
+  adoptedCallback() {}
+
   #render() {
-    this.dispatchEvent(new BeforeRenderEvent());
+    this.#ele.dispatchEvent(new BeforeRenderEvent());
     this.styles = RenderSheet(this.#css());
     this.#virtual_dom.Merge(this.#html());
-    this.dispatchEvent(new RenderEvent());
+    this.#ele.dispatchEvent(new RenderEvent());
   }
 
   attributeChangedCallback(name: string, old: string, next: string) {
     const props_event = new PropsEvent(name, PropValue(old), PropValue(next));
-    this.dispatchEvent(props_event);
+    this.#ele.dispatchEvent(props_event);
     if (props_event.defaultPrevented) return;
-    this.dispatchEvent(new ShouldRender());
+    this.#ele.dispatchEvent(new ShouldRender());
   }
 
   get internals() {
@@ -105,19 +132,19 @@ export abstract class ComponentBase extends HTMLElement {
   }
 
   set before_render(handler: Handler<BeforeRenderEvent>) {
-    this.addEventListener(BeforeRenderEvent.Key, handler);
+    this.#ele.addEventListener(BeforeRenderEvent.Key, handler);
   }
 
   set after_render(handler: Handler<RenderEvent>) {
-    this.addEventListener(RenderEvent.Key, handler);
+    this.#ele.addEventListener(RenderEvent.Key, handler);
   }
 
   set after_load(handler: Handler<LoadedEvent>) {
-    this.addEventListener(LoadedEvent.Key, handler);
+    this.#ele.addEventListener(LoadedEvent.Key, handler);
   }
 
   set after_props(handler: Handler<PropsEvent>) {
-    this.addEventListener(PropsEvent.Key, handler as any);
+    this.#ele.addEventListener(PropsEvent.Key, handler as any);
   }
 
   handler_for(name: string) {
@@ -125,12 +152,18 @@ export abstract class ComponentBase extends HTMLElement {
     const self = this;
     return {
       set handler(handler: Handler<Event>) {
-        self.addEventListener(name, handler);
+        self.#ele.addEventListener(name, handler);
       },
     };
   }
 
   should_render() {
-    this.dispatchEvent(new ShouldRender());
+    this.#ele.dispatchEvent(new ShouldRender());
   }
 }
+
+export const ComponentBase = Base as new (target: HTMLElement) => InstanceType<
+  typeof Base
+> &
+  HTMLElement;
+export type ComponentBase = InstanceType<typeof Base> & HTMLElement;
