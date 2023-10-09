@@ -43,8 +43,7 @@ module.exports = function ${m.FunctionName}(props) {
   get Typings() {
     const m = this.Metadata;
     return `import React from "react";
-    
-${this.ExtraDeclarations}
+${super.Typings}
 
 type CustomElement<T> = T & Partial<React.HTMLAttributes<T> & { children?: React.ReactNode }>;
 
@@ -60,8 +59,6 @@ declare global {
         }>
     }
   }
-
-  ${super.Typings}
 }
 
 ${m.JsDoc(0)}

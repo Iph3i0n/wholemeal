@@ -1,4 +1,4 @@
-import BaseWriter from "./base";
+import BaseWriter, { has_reserved } from "./base";
 
 export default class CallWriter extends BaseWriter {
   readonly #definition: BaseWriter;
@@ -11,8 +11,10 @@ export default class CallWriter extends BaseWriter {
   }
 
   toString(): string {
-    return `(${this.#definition})(${this.#args
-      .map((a) => a.toString())
-      .join(",")})`;
+    const def = this.#definition.toString();
+
+    if (has_reserved(def))
+      return `(${def})(${this.#args.map((a) => a.toString()).join(",")})`;
+    else return `${def}(${this.#args.map((a) => a.toString()).join(",")})`;
   }
 }

@@ -7,7 +7,7 @@ export default class PreactTypingsTemplate extends TypingsTemplate {
 
   get Typings() {
     const m = this.Metadata;
-    return `${this.ExtraDeclarations}
+    return `${super.Typings}
 
 declare module "preact/src/jsx" {
   namespace JSXInternal {
@@ -22,9 +22,6 @@ declare module "preact/src/jsx" {
         } & HTMLAttributes<HTMLElement>;
     }
   }
-}
-declare global {
-  ${super.Typings}
 }`;
   }
 }

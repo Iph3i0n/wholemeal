@@ -16,8 +16,13 @@ export default abstract class ComponentWrapper extends HTMLElement {
     this.#instance = this.Initialiser(this);
 
     this.#instance.then((i) => {
-      this.style.removeProperty("display");
-      i.connectedCallback();
+      try {
+        this.style.removeProperty("display");
+        i.connectedCallback();
+      } catch (err) {
+        console.error(err);
+        debugger;
+      }
     });
   }
 

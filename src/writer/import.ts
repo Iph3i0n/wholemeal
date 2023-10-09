@@ -5,9 +5,9 @@ export default class ImportWriter extends BaseWriter {
   readonly #from: string;
   readonly #default: boolean;
 
-  constructor(name: string, from: string, is_default: boolean) {
+  constructor(name: string | string[], from: string, is_default: boolean) {
     super();
-    this.#name = name;
+    this.#name = Array.isArray(name) ? name.join(", ") : name;
     this.#from = from;
     this.#default = is_default;
   }

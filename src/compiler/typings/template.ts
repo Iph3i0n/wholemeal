@@ -1,16 +1,23 @@
 import { Runner } from "../../types/runner";
-import Metadata from "../../xml/metadata/mod";
+import Component from "../../xml/component";
+import Path from "path";
 
 export default class TypingsTemplate {
-  readonly #metadata: Metadata;
+  readonly #component: Component;
   readonly #extra_types: Runner.Project["docs"];
+  readonly #location: string;
 
-  constructor(metadata: Metadata, extra_types: Runner.Project["docs"]) {
-    this.#metadata = metadata;
+  constructor(
+    component: Component,
+    extra_types: Runner.Project["docs"],
+    location: string
+  ) {
+    this.#component = component;
     this.#extra_types = extra_types;
+    this.#location = location;
   }
 
-  get ExtraDeclarations() {
+  get #ExtraDeclarations() {
     const built_in_types = ["boolean", "string", "number"];
 
     return this.#extra_types.value_sets
@@ -25,16 +32,41 @@ export default class TypingsTemplate {
   }
 
   get Metadata() {
-    return this.#metadata;
+    return this.#component.Metadata;
   }
 
   get Script() {
-    return "";
+    return `import ComponentWrapper from "${Path.resolve(
+      __dirname,
+      "..",
+      "..",
+      "runner",
+      "component-wrapper"
+    )}";
+
+export default class ${
+      this.Metadata.FunctionName
+    }Element extends ComponentWrapper {
+
+Initialiser(self) {
+return import("${this.#location}?actual=true").then(r => new r.default(self));
+}
+}
+
+customElements.define("${this.#component.Metadata.Name}", ${
+      this.#component.Metadata.FunctionName
+    }Element);`;
   }
 
   get Typings() {
-    const m = this.#metadata;
-    return `class ${m.FunctionName}Element extends HTMLElement {
+    const m = this.Metadata;
+    return `
+${m.ScriptImports}
+${this.#component.ScriptImports}
+
+${this.#ExtraDeclarations}
+
+export default class ${m.FunctionName} implements HTMLElement {
   ${m.Attr.map(
     (a) => `/** ${a.Description.Text} */
     "${a.Name}": ${a.Type ?? "string"};`
@@ -46,16 +78,6 @@ export default class TypingsTemplate {
   ).join(`
   `)}
 }
-
-${m.Events.map(
-  (e) => `declare class ${e.Type} extends Event {
-  readonly currentTarget: ${m.FunctionName}Element;
-  ${e.Keys.map((k) => `readonly ${k.Name}: ${k.Type}`).join(`;
-  `)};
-}`
-).join(`
-`)}
-  
 `;
   }
 }
