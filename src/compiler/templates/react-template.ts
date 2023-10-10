@@ -126,6 +126,10 @@ export default class ReactTemplate extends Template {
                 new Js.Access("ref", new Js.Reference("props")),
                 new Js.Reference("ref")
               ),
+              new Js.Assign(
+                new Js.Access("class", new Js.Reference("props")),
+                new Js.Access("className", new Js.Reference("props"))
+              ),
               new Js.Return(
                 new Js.Call(
                   new Js.Access("createElement", new Js.Reference("React")),

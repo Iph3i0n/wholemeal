@@ -1,6 +1,7 @@
 import MetadataItem from "./base";
 import Description from "./description";
 import Key from "./key";
+import * as Ts from "../../ts-writer";
 
 export default class Event extends MetadataItem {
   get Name() {
@@ -16,7 +17,13 @@ export default class Event extends MetadataItem {
   }
 
   get Typings() {
-    return `${this.HandlerName}?: (event: ${this.Type}) => void`;
+    return new Ts.Property(
+      this.HandlerName,
+      new Ts.Lambda(new Ts.Reference("void"), [
+        "event",
+        new Ts.Reference(this.Type),
+      ])
+    );
   }
 
   get HandlerName() {

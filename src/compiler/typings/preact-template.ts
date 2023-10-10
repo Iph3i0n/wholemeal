@@ -1,27 +1,38 @@
+import * as Ts from "../../ts-writer";
 import TypingsTemplate from "./template";
 
 export default class PreactTypingsTemplate extends TypingsTemplate {
-  get Script() {
-    return super.Script;
-  }
-
   get Typings() {
-    const m = this.Metadata;
-    return `${super.Typings}
+    return [
+      ...super.Typings,
+      new Ts.Declare(
+        new Ts.Module(
+          "preact/src/jsx",
+          new Ts.Namespace(
+            "JSXInternal",
+            new Ts.Create(
+              "import",
+              "HTMLAttributes",
+              new Ts.Access("HTMLAttributes", new Ts.Reference("JSXInternal"))
+            ),
+            new Ts.Interface(
+              "IntrinsicElements",
 
-declare module "preact/src/jsx" {
-  namespace JSXInternal {
-    import HTMLAttributes = JSXInternal.HTMLAttributes;
-
-    interface IntrinsicElements {
-        ${m.JsDoc(8)}
-        "${m.Name}": {
-          ${m.Attr.map((p) => p.Typings).concat(m.Events.map((p) => p.Typings))
-            .join(`;
-          `)}
-        } & HTMLAttributes<HTMLElement>;
-    }
-  }
-}`;
+              new Ts.Property(
+                this.Metadata.Name,
+                new Ts.Operator(
+                  new Ts.Object(...this.Metadata.Attr.map((a) => a.Typings)),
+                  "&",
+                  new Ts.AppyGeneric(
+                    new Ts.Reference("HTMLAttributes"),
+                    new Ts.Reference("HTMLElement")
+                  )
+                )
+              )
+            )
+          )
+        )
+      ),
+    ];
   }
 }

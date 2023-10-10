@@ -1,6 +1,6 @@
 import { Runner } from "../../types/runner";
 import Component from "../../xml/component";
-import Path from "path";
+import * as Ts from "../../ts-writer";
 
 export default class TypingsTemplate {
   readonly #component: Component;
@@ -17,67 +17,54 @@ export default class TypingsTemplate {
     this.#location = location;
   }
 
-  get #ExtraDeclarations() {
-    const built_in_types = ["boolean", "string", "number"];
+  #type_for(type: Runner.Project["docs"]["value_sets"][number]) {
+    let result: Ts.Any | undefined = undefined;
 
-    return this.#extra_types.value_sets
-      .filter((v) => !built_in_types.includes(v.name))
-      .map(
-        (v) =>
-          `type ${v.name} = ${v.values
-            .map((t) => '"' + t.name + '"')
-            .join(" | ")}`
-      )
-      .join(`;\n`);
+    for (const part of type.values)
+      if (!result) result = new Ts.String(part.name);
+      else result = new Ts.Operator(new Ts.String(part.name), "|", result);
+
+    return result ?? new Ts.Reference("");
   }
 
   get Metadata() {
     return this.#component.Metadata;
   }
 
-  get Script() {
-    return `import ComponentWrapper from "${Path.resolve(
-      __dirname,
-      "..",
-      "..",
-      "runner",
-      "component-wrapper"
-    )}";
-
-export default class ${
-      this.Metadata.FunctionName
-    }Element extends ComponentWrapper {
-
-Initialiser(self) {
-return import("${this.#location}?actual=true").then(r => new r.default(self));
-}
-}
-
-customElements.define("${this.#component.Metadata.Name}", ${
-      this.#component.Metadata.FunctionName
-    }Element);`;
-  }
-
-  get Typings() {
+  get Typings(): Array<Ts.Any> {
     const m = this.Metadata;
-    return `
-${m.ScriptImports}
-${this.#component.ScriptImports}
-
-${this.#ExtraDeclarations}
-
-export default class ${m.FunctionName} implements HTMLElement {
-  ${m.Attr.map(
-    (a) => `/** ${a.Description.Text} */
-    "${a.Name}": ${a.Type ?? "string"};`
-  ).join(`
-  `)}
-  ${m.Members.map(
-    (a) => `/** ${a.Description.Text} */
-    ${a.Readonly ? "readonly " : ""}"${a.Name}": ${a.Type ?? "string"};`
-  ).join(`
-  `)}
-}
-`;
+    const base = this.Metadata.Base?.Name ?? "ComponentBase";
+    return [
+      new Ts.Reference(m.ScriptImports),
+      new Ts.Reference(this.#component.ScriptImports),
+      ...this.#extra_types.value_sets.map(
+        (v) => new Ts.Type(v.name, this.#type_for(v))
+      ),
+      new Ts.Export(
+        new Ts.Class(
+          m.FunctionName,
+          "extends",
+          new Ts.Reference(base),
+          ...m.Attr.map(
+            (a) =>
+              new Ts.Property(
+                a.Name,
+                new Ts.Reference(a.Type ?? "string"),
+                a.Optional
+              )
+          ),
+          ...m.Members.map(
+            (a) =>
+              new Ts.Property(
+                a.Name,
+                new Ts.Reference(a.Type ?? "string"),
+                a.Optional,
+                a.Readonly ? "readonly" : ""
+              )
+          )
+        ),
+        false
+      ),
+    ];
   }
 }

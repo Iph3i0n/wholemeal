@@ -52,16 +52,32 @@ export default function (this: Webpack.LoaderContext<unknown>, source: string) {
     () => [PreactTemplate, PreactTypingsTemplate] as const
   )(options.framework ?? "native");
 
-  const template = new js_constructor(component, this.resourcePath);
-
   const package_json = read_json("./package.json");
   const extra_types = package_json.wholemeal;
+
+  const tsconfig = read_json("./tsconfig.json");
+  const root_dir = tsconfig?.compilerOptions?.rootDir ?? "./";
+  const local_path = Path.relative(root_dir, this.resource);
+
+  const template = new js_constructor(component, this.resourcePath);
+  const typings_template = new typings_constructor(
+    component,
+    extra_types,
+    this.resource
+  );
 
   if (!this.resourceQuery) {
     return template.Wrapper.join(";");
   }
 
   let result = template.Module;
+
+  if (options.typings) {
+    this.emitFile(
+      local_path.replace(".std", ".std.d.ts"),
+      typings_template.Typings.join(";")
+    );
+  }
 
   return result.join(";");
 }

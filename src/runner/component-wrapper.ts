@@ -21,7 +21,6 @@ export default abstract class ComponentWrapper extends HTMLElement {
         i.connectedCallback();
       } catch (err) {
         console.error(err);
-        debugger;
       }
     });
   }

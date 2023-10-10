@@ -1,6 +1,7 @@
 import MetadataItem from "./base";
 import Description from "./description";
 import ToPascal from "./to-pascal";
+import * as Ts from "../../ts-writer";
 
 export default class Prop extends MetadataItem {
   get Name() {
@@ -52,9 +53,11 @@ export default class Prop extends MetadataItem {
   }
 
   get Typings() {
-    return `"${this.Name}"${
-      this.Optional || this.Default || this.Type === "boolean" ? "?" : ""
-    }: ${this.Type || "string"}`;
+    return new Ts.Property(
+      this.Name,
+      new Ts.Reference(this.Type ?? "string"),
+      this.Optional || !!this.Default || this.Type === "boolean"
+    );
   }
 
   get JsDoc() {

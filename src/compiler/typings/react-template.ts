@@ -1,71 +1,74 @@
 import TypingsTemplate from "./template";
+import * as Ts from "../../ts-writer";
 
 export default class ReactTypingsTemplate extends TypingsTemplate {
-  get Script() {
-    const m = this.Metadata;
-    return `const React = require("react");
-
-${super.Script}
-
-module.exports = function ${m.FunctionName}(props) {
-  const ref = props.inner_ref || React.useRef();
-
-  ${m.Attr.filter((a) => a.Property).map(
-    (p) => `React.useEffect(() => {
-    const r = ref.current;
-    if (!r) return;
-
-    r["${p.Name}"] = props["${p.Name}"];
-  }, [ref.current, props["${p.Name}"]]);`
-  ).join(`
-  `)}
-
-
-  ${m.Events.map(
-    (p) => `React.useEffect(() => {
-    const r = ref.current;
-    if (!r) return;
-
-    if (props["${p.HandlerName}"]) {
-      r.addEventListener("${p.Name}", props["${p.HandlerName}"]);
-      return () => {
-        r.removeEventListener("${p.Name}", props["${p.HandlerName}"]);
-      }
-    }
-  }, [ref.current, props["${p.HandlerName}"]]);`
-  ).join(`
-  `)}
-
-  return React.createElement("${m.Name}", { ...props, ref });
-}`;
-  }
-
   get Typings() {
-    const m = this.Metadata;
-    return `import React from "react";
-${super.Typings}
-
-type CustomElement<T> = T & Partial<React.HTMLAttributes<T> & { children?: React.ReactNode }>;
-
-
-
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      ${m.JsDoc(8)}
-        "${m.Name}": CustomElement<{
-          ${m.Attr.map((p) => p.Typings).join(`;
-          `)}
-        }>
-    }
-  }
-}
-
-${m.JsDoc(0)}
-export default function ${m.FunctionName}(props: CustomElement<{
-  ${m.Attr.map((p) => p.Typings).concat(m.Events.map((p) => p.Typings)).join(`;
-  `)}
-  inner_ref?: React.MutableRefObject<${m.FunctionName}Element | undefined>;
-}>): React.DOMElement<React.HTMLAttributes, ${m.FunctionName}Element>;`;
+    return [
+      new Ts.Import("React", "react", true),
+      ...super.Typings,
+      new Ts.Type(
+        "CustomElement",
+        new Ts.Operator(
+          new Ts.Reference("T"),
+          "&",
+          new Ts.AppyGeneric(
+            new Ts.Reference("Partial"),
+            new Ts.Operator(
+              new Ts.AppyGeneric(
+                new Ts.Access("HTMLAttributes", new Ts.Reference("React")),
+                new Ts.Reference("T")
+              ),
+              "&",
+              new Ts.Object(
+                new Ts.Property(
+                  "children",
+                  new Ts.Access("ReactNode", new Ts.Reference("React")),
+                  true
+                )
+              )
+            )
+          )
+        ),
+        "T"
+      ),
+      new Ts.Declare(
+        new Ts.Global(
+          new Ts.Namespace(
+            "JSX",
+            new Ts.Interface(
+              "IntrinsicElements",
+              new Ts.Property(
+                this.Metadata.Name,
+                new Ts.AppyGeneric(
+                  new Ts.Reference("CustomElement"),
+                  new Ts.Object(...this.Metadata.Attr.map((p) => p.Typings))
+                )
+              )
+            )
+          )
+        )
+      ),
+      new Ts.Export(
+        new Ts.Function(
+          this.Metadata.FunctionName,
+          new Ts.AppyGeneric(
+            new Ts.Access("DOMElement", new Ts.Reference("React")),
+            new Ts.Access("HTMLAttributes", new Ts.Reference("React")),
+            new Ts.Reference(`${this.Metadata.FunctionName}Element`)
+          ),
+          [
+            "props",
+            new Ts.AppyGeneric(
+              new Ts.Reference("CustomElement"),
+              new Ts.Object(
+                ...this.Metadata.Attr.map((a) => a.Typings),
+                ...this.Metadata.Events.map((e) => e.Typings)
+              )
+            ),
+          ]
+        ),
+        false
+      ),
+    ];
   }
 }
